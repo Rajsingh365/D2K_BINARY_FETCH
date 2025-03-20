@@ -1,36 +1,54 @@
 
 .react-flow__node {
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e5e5;
   padding: 0;
-  width: 200px;
+  width: 220px;
+  transition: all 0.2s ease;
+}
+
+.react-flow__node:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .react-flow__node-agentNode {
   border-radius: 8px;
-  width: 220px;
+  width: 240px;
   overflow: visible;
 }
 
 .react-flow__edge-path {
   stroke: #555;
   stroke-width: 2;
+  transition: stroke 0.2s ease;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #000;
+  stroke-width: 2.5;
 }
 
 .react-flow__handle {
   background-color: #fff;
   border: 2px solid #555;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
+  transition: all 0.2s ease;
+}
+
+.react-flow__handle:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.1);
 }
 
 .react-flow__handle-bottom {
-  bottom: -6px;
+  bottom: -7px;
 }
 
 .react-flow__handle-top {
-  top: -6px;
+  top: -7px;
 }
 
 .react-flow__attribution {
@@ -39,14 +57,46 @@
 }
 
 .agent-panel-item {
-  cursor: move;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
 .agent-panel-item:hover {
   background-color: rgba(0, 0, 0, 0.02);
+  transform: translateY(-2px);
+}
+
+.agent-panel-item:active {
+  cursor: grabbing;
 }
 
 .react-flow__minimap {
   border-radius: 8px;
   border: 1px solid #e5e5e5;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.react-flow__controls {
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 4px;
+}
+
+.react-flow__controls-button {
+  border: none;
+  border-radius: 4px;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.react-flow__controls-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.react-flow__panel {
+  transition: opacity 0.3s ease;
 }

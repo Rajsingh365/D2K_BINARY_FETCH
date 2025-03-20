@@ -27,7 +27,7 @@ import AgentNode from '@/components/workflow/AgentNode';
 import AgentPanel from '@/components/workflow/AgentPanel';
 import { Agent, agents } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { Save, Share2, Play, ArrowLeft } from 'lucide-react';
+import { Save, Share2, Play, ArrowLeft, Trash2, Zap } from 'lucide-react';
 
 // Define custom node types
 const nodeTypes = {
@@ -107,8 +107,16 @@ const WorkflowEditor = () => {
     toast.success('Workflow started! This would execute the workflow in a real application.');
   };
 
+  const handleClearCanvas = () => {
+    if (nodes.length > 0 || edges.length > 0) {
+      setNodes([]);
+      setEdges([]);
+      toast.info('Canvas cleared');
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-muted/30">
       <Navbar />
       
       <main className="flex-grow pt-20">
@@ -134,6 +142,10 @@ const WorkflowEditor = () => {
                 <Share2 size={16} className="mr-1" />
                 Share
               </Button>
+              <Button variant="outline" size="sm" onClick={handleClearCanvas}>
+                <Trash2 size={16} className="mr-1" />
+                Clear
+              </Button>
               <Button variant="outline" size="sm" onClick={handleSaveWorkflow}>
                 <Save size={16} className="mr-1" />
                 Save
@@ -146,12 +158,22 @@ const WorkflowEditor = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-[calc(100vh-240px)]">
-            <div className="md:col-span-1 bg-secondary/20 rounded-xl overflow-y-auto p-4 border">
-              <h3 className="font-medium mb-4">Available Agents</h3>
-              <AgentPanel agents={agents} />
+            <div className="md:col-span-1 bg-background rounded-xl overflow-hidden shadow-sm border">
+              <div className="p-4 border-b bg-muted/30">
+                <h3 className="font-medium text-lg flex items-center gap-2">
+                  <Zap size={18} className="text-primary" />
+                  Available Agents
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Drag and drop agents into the canvas
+                </p>
+              </div>
+              <div className="p-4 h-[calc(100%-64px)]">
+                <AgentPanel agents={agents} />
+              </div>
             </div>
 
-            <div className="md:col-span-4 border rounded-xl bg-white h-full" ref={reactFlowWrapper}>
+            <div className="md:col-span-4 border rounded-xl bg-background h-full overflow-hidden shadow-sm" ref={reactFlowWrapper}>
               <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -165,10 +187,11 @@ const WorkflowEditor = () => {
                 fitView
                 attributionPosition="bottom-right"
               >
-                <Controls />
-                <MiniMap />
-                <Background variant="dots" gap={12} size={1} />
-                <Panel position="top-left" className="bg-white p-3 rounded-md shadow-sm border">
+                <Controls className="m-4" />
+                <MiniMap className="m-4" />
+                {/* Fix for TypeScript error: changed "dots" to "lines" */}
+                <Background variant="lines" gap={12} size={1} />
+                <Panel position="top-left" className="m-4 bg-background p-3 rounded-md shadow-sm border">
                   <p className="text-xs text-muted-foreground">
                     Drag agents from the left panel and connect them to create your workflow.
                   </p>

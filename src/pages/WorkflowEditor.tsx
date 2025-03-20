@@ -190,8 +190,8 @@ const WorkflowEditor = () => {
               >
                 <Controls className="m-4" />
                 <MiniMap className="m-4" />
-                {/* Fix for TypeScript error: Instead of using "dots" or "lines", use a valid BackgroundVariant value */}
-                <Background variant={BackgroundVariant.DOTS} gap={12} size={1} />
+                {/* Fix for TypeScript error: Use BackgroundVariant.Dots instead of BackgroundVariant.DOTS */}
+                <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
                 <Panel position="top-left" className="m-4 bg-background p-3 rounded-md shadow-sm border">
                   <p className="text-xs text-muted-foreground">
                     Drag agents from the left panel and connect them to create your workflow.

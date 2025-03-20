@@ -14,7 +14,8 @@ import {
   Edge,
   Node,
   NodeChange,
-  EdgeChange
+  EdgeChange,
+  BackgroundVariant
 } from '@xyflow/react';
 import { toast } from 'sonner';
 
@@ -189,8 +190,8 @@ const WorkflowEditor = () => {
               >
                 <Controls className="m-4" />
                 <MiniMap className="m-4" />
-                {/* Fix for TypeScript error: changed "dots" to "lines" */}
-                <Background variant="lines" gap={12} size={1} />
+                {/* Fix for TypeScript error: changed "lines" to "dots" which is a valid BackgroundVariant */}
+                <Background variant="dots" gap={12} size={1} />
                 <Panel position="top-left" className="m-4 bg-background p-3 rounded-md shadow-sm border">
                   <p className="text-xs text-muted-foreground">
                     Drag agents from the left panel and connect them to create your workflow.

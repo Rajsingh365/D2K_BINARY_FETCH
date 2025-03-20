@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
+import WorkflowEditor from "./pages/WorkflowEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,11 +46,11 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/workflow-editor" element={<WorkflowEditor />} />
             {/* Future routes would go here */}
             {/* <Route path="/marketplace" element={<Marketplace />} /> */}
             {/* <Route path="/my-workflows" element={<MyWorkflows />} /> */}
             {/* <Route path="/templates" element={<Templates />} /> */}
-            {/* <Route path="/builder/:id?" element={<WorkflowBuilder />} /> */}
             {/* <Route path="/profile" element={<Profile />} /> */}
             {/* <Route path="/signin" element={<SignIn />} /> */}
             {/* <Route path="/signup" element={<SignUp />} /> */}

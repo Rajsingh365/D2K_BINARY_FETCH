@@ -1,0 +1,52 @@
+
+.react-flow__node {
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e5e5;
+  padding: 0;
+  width: 200px;
+}
+
+.react-flow__node-agentNode {
+  border-radius: 8px;
+  width: 220px;
+  overflow: visible;
+}
+
+.react-flow__edge-path {
+  stroke: #555;
+  stroke-width: 2;
+}
+
+.react-flow__handle {
+  background-color: #fff;
+  border: 2px solid #555;
+  width: 10px;
+  height: 10px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -6px;
+}
+
+.react-flow__handle-top {
+  top: -6px;
+}
+
+.react-flow__attribution {
+  background: transparent;
+  color: #999;
+}
+
+.agent-panel-item {
+  cursor: move;
+}
+
+.agent-panel-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.react-flow__minimap {
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AgentCard from '@/components/marketplace/AgentCard';
@@ -18,6 +19,7 @@ const Index = () => {
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const [filteredAgents, setFilteredAgents] = useState<Agent[]>(agents);
   const [selectedSection, setSelectedSection] = useState<'marketplace' | 'templates'>('marketplace');
+  const navigate = useNavigate();
 
   useEffect(() => {
     let filtered = agents;
@@ -68,6 +70,10 @@ const Index = () => {
     }
   };
 
+  const goToWorkflowEditor = () => {
+    navigate('/workflow-editor');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -92,7 +98,7 @@ const Index = () => {
                     <Layers size={18} />
                     Explore Marketplace
                   </Button>
-                  <Button variant="outline" className="h-12 px-6 gap-2">
+                  <Button variant="outline" className="h-12 px-6 gap-2" onClick={goToWorkflowEditor}>
                     <PlusCircle size={18} />
                     Create Custom Flow
                   </Button>

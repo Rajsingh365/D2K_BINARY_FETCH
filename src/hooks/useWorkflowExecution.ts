@@ -61,7 +61,7 @@ export const useWorkflowExecution = (nodes: Node[], edges: Edge[], allAgents: Ag
     
     // Initialize results for all nodes in sequence
     const initialResults = sequence.map(node => {
-      const agentData = node.data?.agent;
+      const agentData = node.data?.agent as Agent | undefined;
       return {
         agentId: agentData?.id || '',
         input: '',
@@ -119,9 +119,13 @@ export const useWorkflowExecution = (nodes: Node[], edges: Edge[], allAgents: Ag
     if (currentAgentIndex < 0 || !executionSequence[currentAgentIndex]) return null;
     
     const nodeData = executionSequence[currentAgentIndex].data;
-    if (!nodeData || !nodeData.agent) return null;
+    if (!nodeData) return null;
     
-    return allAgents.find(a => a.id === nodeData.agent.id) || null;
+    // Properly type-cast the agent data
+    const agentData = nodeData.agent as Agent;
+    if (!agentData) return null;
+    
+    return allAgents.find(a => a.id === agentData.id) || null;
   }, [currentAgentIndex, executionSequence, allAgents]);
 
   return {

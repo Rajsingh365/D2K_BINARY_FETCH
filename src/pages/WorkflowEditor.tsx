@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -24,7 +25,7 @@ import AgentPanel from '@/components/workflow/AgentPanel';
 import AgentInputModal from '@/components/workflow/AgentInputModal';
 import WorkflowResults from '@/components/workflow/WorkflowResults';
 import { useWorkflowExecution } from '@/hooks/useWorkflowExecution';
-import { agents } from '@/lib/data';
+import { agents, Agent } from '@/lib/data';
 import { templates } from '@/lib/templateData';
 import { Button } from '@/components/ui/button';
 import { Save, Share2, Play, ArrowLeft, Trash2, Zap, StopCircle } from 'lucide-react';
@@ -59,6 +60,7 @@ const WorkflowEditor = () => {
   // Modal state
   const [showInputModal, setShowInputModal] = useState(false);
   const [processingInput, setProcessingInput] = useState(false);
+  const [activeAgent, setActiveAgent] = useState<Agent | null>(null);
 
   // Parse query parameters for template
   useEffect(() => {
@@ -72,10 +74,13 @@ const WorkflowEditor = () => {
   
   // Watch for changes in current agent and show input modal
   useEffect(() => {
-    if (currentAgent) {
+    const agent = currentAgent();
+    if (agent) {
+      setActiveAgent(agent);
       setShowInputModal(true);
     } else {
       setShowInputModal(false);
+      setActiveAgent(null);
     }
   }, [currentAgent]);
 
@@ -348,9 +353,9 @@ const WorkflowEditor = () => {
       </div>
 
       {/* Agent Input Modal */}
-      {currentAgent && (
+      {activeAgent && (
         <AgentInputModal
-          agent={currentAgent}
+          agent={activeAgent}
           isOpen={showInputModal}
           onClose={() => {
             if (!processingInput) {

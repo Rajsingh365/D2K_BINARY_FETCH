@@ -40,11 +40,11 @@ const StepResultsView: React.FC<StepResultsViewProps> = ({
       <CardContent className="p-6 space-y-4">
         <div>
           <h4 className="text-sm font-medium text-muted-foreground mb-2">Input:</h4>
-          <div className="p-3 bg-muted/30 rounded-md text-sm">{result.input}</div>
+          <div className="p-3 bg-muted/30 rounded-md text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">{result.input}</div>
         </div>
         <div>
           <h4 className="text-sm font-medium text-muted-foreground mb-2">Output:</h4>
-          <div className="p-3 bg-muted/30 rounded-md text-sm">{result.output}</div>
+          <div className="p-3 bg-muted/30 rounded-md text-sm whitespace-pre-wrap max-h-60 overflow-y-auto">{result.output}</div>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">

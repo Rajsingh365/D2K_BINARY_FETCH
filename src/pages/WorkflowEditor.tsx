@@ -21,10 +21,13 @@ import '../styles/workflow-editor.css';
 
 import AgentNode from '@/components/workflow/AgentNode';
 import AgentPanel from '@/components/workflow/AgentPanel';
+import AgentInputModal from '@/components/workflow/AgentInputModal';
+import WorkflowResults from '@/components/workflow/WorkflowResults';
+import { useWorkflowExecution } from '@/hooks/useWorkflowExecution';
 import { agents } from '@/lib/data';
 import { templates } from '@/lib/templateData';
 import { Button } from '@/components/ui/button';
-import { Save, Share2, Play, ArrowLeft, Trash2, Zap } from 'lucide-react';
+import { Save, Share2, Play, ArrowLeft, Trash2, Zap, StopCircle } from 'lucide-react';
 
 // Define custom node types
 const nodeTypes = {
@@ -43,6 +46,20 @@ const WorkflowEditor = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Workflow execution state
+  const {
+    isRunning,
+    results,
+    startWorkflow,
+    processAgentInput,
+    stopWorkflow,
+    currentAgent
+  } = useWorkflowExecution(nodes, edges, agents);
+
+  // Modal state
+  const [showInputModal, setShowInputModal] = useState(false);
+  const [processingInput, setProcessingInput] = useState(false);
+
   // Parse query parameters for template
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -52,6 +69,15 @@ const WorkflowEditor = () => {
       loadTemplate(templateId);
     }
   }, [location]);
+  
+  // Watch for changes in current agent and show input modal
+  useEffect(() => {
+    if (currentAgent) {
+      setShowInputModal(true);
+    } else {
+      setShowInputModal(false);
+    }
+  }, [currentAgent]);
 
   // Load template function
   const loadTemplate = (templateId: string) => {
@@ -153,7 +179,6 @@ const WorkflowEditor = () => {
   );
 
   const handleSaveWorkflow = () => {
-    // In a real app, this would save to a database
     const flow = {
       name: workflowName,
       nodes,
@@ -170,7 +195,13 @@ const WorkflowEditor = () => {
       toast.error('Your workflow is empty. Add some agents first!');
       return;
     }
-    toast.success('Workflow started! This would execute the workflow in a real application.');
+    
+    startWorkflow();
+  };
+
+  const handleStopWorkflow = () => {
+    stopWorkflow();
+    toast.info('Workflow execution stopped');
   };
 
   const handleClearCanvas = () => {
@@ -179,6 +210,12 @@ const WorkflowEditor = () => {
       setEdges([]);
       toast.info('Canvas cleared');
     }
+  };
+
+  const handleAgentInputSubmit = (inputText: string, files: File[]) => {
+    setProcessingInput(true);
+    processAgentInput(inputText, files);
+    setProcessingInput(false);
   };
 
   return (      
@@ -190,6 +227,7 @@ const WorkflowEditor = () => {
             size="sm" 
             className="mr-2"
             onClick={() => navigate('/templates')}
+            disabled={isRunning}
           >
             <ArrowLeft size={16} className="mr-1" />
             Back to Templates
@@ -199,24 +237,54 @@ const WorkflowEditor = () => {
             value={workflowName}
             onChange={(e) => setWorkflowName(e.target.value)}
             className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 py-2 px-0 mr-2"
+            disabled={isRunning}
           />
           <div className="ml-auto flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => toast.info('Share functionality would go here')}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => toast.info('Share functionality would go here')}
+              disabled={isRunning}
+            >
               <Share2 size={16} className="mr-1" />
               Share
             </Button>
-            <Button variant="outline" size="sm" onClick={handleClearCanvas}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleClearCanvas}
+              disabled={isRunning}
+            >
               <Trash2 size={16} className="mr-1" />
               Clear
             </Button>
-            <Button variant="outline" size="sm" onClick={handleSaveWorkflow}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSaveWorkflow}
+              disabled={isRunning}
+            >
               <Save size={16} className="mr-1" />
               Save
             </Button>
-            <Button size="sm" onClick={handleRunWorkflow}>
-              <Play size={16} className="mr-1" />
-              Run Workflow
-            </Button>
+            {isRunning ? (
+              <Button 
+                size="sm" 
+                variant="destructive" 
+                onClick={handleStopWorkflow}
+              >
+                <StopCircle size={16} className="mr-1" />
+                Stop Workflow
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                onClick={handleRunWorkflow}
+              >
+                <Play size={16} className="mr-1" />
+                Run Workflow
+              </Button>
+            )}
           </div>
         </div>
 
@@ -236,34 +304,63 @@ const WorkflowEditor = () => {
             </div>
           </div>
 
-          <div className="md:col-span-4 border rounded-xl bg-background h-full overflow-hidden shadow-sm" ref={reactFlowWrapper}>
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onInit={setReactFlowInstance}
-              onDrop={onDrop}
-              onDragOver={onDragOver}
-              nodeTypes={nodeTypes}
-              fitView
-              attributionPosition="bottom-right"
-            >
-              <Controls className="m-4" />
-              <MiniMap className="m-4" />
-              <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-              <Panel position="top-left" className="m-4 bg-background p-3 rounded-md shadow-sm border">
-                <p className="text-xs text-muted-foreground">
-                  {nodes.length === 0 
-                    ? "Drag agents from the left panel and connect them to create your workflow."
-                    : `Your workflow has ${nodes.length} agents and ${edges.length} connections.`}
-                </p>
-              </Panel>
-            </ReactFlow>
+          <div className="md:col-span-4 flex flex-col gap-4">
+            <div className="border rounded-xl bg-background overflow-hidden shadow-sm flex-grow" ref={reactFlowWrapper}>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onInit={setReactFlowInstance}
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                nodeTypes={nodeTypes}
+                fitView
+                attributionPosition="bottom-right"
+                nodesDraggable={!isRunning}
+                nodesConnectable={!isRunning}
+                elementsSelectable={!isRunning}
+              >
+                <Controls className="m-4" />
+                <MiniMap className="m-4" />
+                <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+                <Panel position="top-left" className="m-4 bg-background p-3 rounded-md shadow-sm border">
+                  <p className="text-xs text-muted-foreground">
+                    {isRunning 
+                      ? "Workflow is running. Please provide input for each agent when prompted."
+                      : nodes.length === 0 
+                        ? "Drag agents from the left panel and connect them to create your workflow."
+                        : `Your workflow has ${nodes.length} agents and ${edges.length} connections.`}
+                  </p>
+                </Panel>
+              </ReactFlow>
+            </div>
+            
+            {/* Results section */}
+            {results.length > 0 && (
+              <div className="border rounded-xl bg-background p-4 shadow-sm overflow-auto" style={{ maxHeight: '35vh' }}>
+                <WorkflowResults results={results} agents={agents} />
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Agent Input Modal */}
+      {currentAgent && (
+        <AgentInputModal
+          agent={currentAgent}
+          isOpen={showInputModal}
+          onClose={() => {
+            if (!processingInput) {
+              handleStopWorkflow();
+            }
+          }}
+          onSubmit={handleAgentInputSubmit}
+          isProcessing={processingInput}
+        />
+      )}
     </main>
   );
 };

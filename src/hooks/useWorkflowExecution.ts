@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { Agent } from '@/lib/data';
@@ -10,6 +9,7 @@ export const useWorkflowExecution = (nodes: Node[], edges: Edge[], allAgents: Ag
   const [currentAgentIndex, setCurrentAgentIndex] = useState(-1);
   const [results, setResults] = useState<AgentResult[]>([]);
   const [executionSequence, setExecutionSequence] = useState<Node[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
   // Determine the execution sequence of nodes based on the graph
   const prepareExecutionSequence = useCallback(() => {
@@ -73,6 +73,7 @@ export const useWorkflowExecution = (nodes: Node[], edges: Edge[], allAgents: Ag
     setResults(initialResults);
     setIsRunning(true);
     setCurrentAgentIndex(0);
+    setShowResults(false);
   }, [prepareExecutionSequence]);
 
   const processAgentInput = useCallback((inputText: string, files: File[]) => {
@@ -96,22 +97,61 @@ export const useWorkflowExecution = (nodes: Node[], edges: Edge[], allAgents: Ag
         return updated;
       });
       
-      // Move to next agent
-      if (currentAgentIndex < executionSequence.length - 1) {
-        setCurrentAgentIndex(prev => prev + 1);
-      } else {
-        // Workflow completed
-        setIsRunning(false);
-        toast.success('Workflow execution completed!');
-      }
+      // Show results after each step
+      setShowResults(true);
     }, 5000);
   }, [currentAgentIndex, executionSequence]);
+
+  const continueWorkflow = useCallback(() => {
+    setShowResults(false);
+    
+    // Move to next agent
+    if (currentAgentIndex < executionSequence.length - 1) {
+      setCurrentAgentIndex(prev => prev + 1);
+    } else {
+      // Workflow completed
+      setIsRunning(false);
+      toast.success('Workflow execution completed!');
+    }
+  }, [currentAgentIndex, executionSequence]);
+
+  const modifyCurrentStep = useCallback(() => {
+    // Allow re-processing of the current agent
+    setShowResults(false);
+    
+    // Keep the same agent index, just reset its status
+    setResults(prev => {
+      const updated = [...prev];
+      updated[currentAgentIndex].status = 'waiting';
+      return updated;
+    });
+  }, [currentAgentIndex]);
+
+  const goBackOneStep = useCallback(() => {
+    if (currentAgentIndex <= 0) return;
+    
+    setShowResults(false);
+    
+    // Go back to previous agent
+    setCurrentAgentIndex(prev => prev - 1);
+    
+    // Reset the status of the current and previous agent
+    setResults(prev => {
+      const updated = [...prev];
+      if (currentAgentIndex < updated.length) {
+        updated[currentAgentIndex].status = 'waiting';
+      }
+      updated[currentAgentIndex - 1].status = 'waiting';
+      return updated;
+    });
+  }, [currentAgentIndex]);
 
   const stopWorkflow = useCallback(() => {
     setIsRunning(false);
     setCurrentAgentIndex(-1);
     setResults([]);
     setExecutionSequence([]);
+    setShowResults(false);
   }, []);
 
   // Get the current agent being processed
@@ -133,8 +173,12 @@ export const useWorkflowExecution = (nodes: Node[], edges: Edge[], allAgents: Ag
     currentAgentIndex,
     results,
     executionSequence,
+    showResults,
     startWorkflow,
     processAgentInput,
+    continueWorkflow,
+    modifyCurrentStep,
+    goBackOneStep,
     stopWorkflow,
     currentAgent,
   };

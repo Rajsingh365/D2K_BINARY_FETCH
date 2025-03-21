@@ -24,6 +24,7 @@ import AgentNode from '@/components/workflow/AgentNode';
 import AgentPanel from '@/components/workflow/AgentPanel';
 import AgentInputModal from '@/components/workflow/AgentInputModal';
 import WorkflowResults from '@/components/workflow/WorkflowResults';
+import StepResultsView from '@/components/workflow/StepResultsView';
 import { useWorkflowExecution } from '@/hooks/useWorkflowExecution';
 import { agents, Agent } from '@/lib/data';
 import { templates } from '@/lib/templateData';
@@ -51,10 +52,16 @@ const WorkflowEditor = () => {
   const {
     isRunning,
     results,
+    showResults,
     startWorkflow,
     processAgentInput,
+    continueWorkflow,
+    modifyCurrentStep,
+    goBackOneStep,
     stopWorkflow,
-    currentAgent
+    currentAgent,
+    currentAgentIndex,
+    executionSequence
   } = useWorkflowExecution(nodes, edges, agents);
 
   // Modal state
@@ -75,14 +82,13 @@ const WorkflowEditor = () => {
   // Watch for changes in current agent and show input modal
   useEffect(() => {
     const agent = currentAgent();
-    if (agent) {
+    if (agent && !showResults) {
       setActiveAgent(agent);
       setShowInputModal(true);
     } else {
       setShowInputModal(false);
-      setActiveAgent(null);
     }
-  }, [currentAgent]);
+  }, [currentAgent, showResults]);
 
   // Load template function
   const loadTemplate = (templateId: string) => {
@@ -223,6 +229,17 @@ const WorkflowEditor = () => {
     setProcessingInput(false);
   };
 
+  // Get the current result for the StepResultsView
+  const getCurrentResult = () => {
+    if (currentAgentIndex < 0 || currentAgentIndex >= results.length) {
+      return { input: '', output: '' };
+    }
+    return {
+      input: results[currentAgentIndex].input,
+      output: results[currentAgentIndex].output
+    };
+  };
+
   return (      
     <main className="flex-grow pt-20 bg-muted/30">
       <div className="container mx-auto px-4 py-6">
@@ -293,6 +310,21 @@ const WorkflowEditor = () => {
           </div>
         </div>
 
+        {/* Show step results view when results should be displayed */}
+        {isRunning && showResults && (
+          <div className="mb-6">
+            <StepResultsView
+              agent={activeAgent}
+              result={getCurrentResult()}
+              onContinue={continueWorkflow}
+              onModify={modifyCurrentStep}
+              onGoBack={goBackOneStep}
+              isFirstStep={currentAgentIndex === 0}
+              isLastStep={currentAgentIndex === executionSequence.length - 1}
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-[calc(100vh-240px)]">
           <div className="md:col-span-1 bg-background rounded-xl overflow-hidden shadow-sm border">
             <div className="p-4 border-b bg-muted/30">
@@ -343,7 +375,7 @@ const WorkflowEditor = () => {
             </div>
             
             {/* Results section */}
-            {results.length > 0 && (
+            {results.length > 0 && !showResults && (
               <div className="border rounded-xl bg-background p-4 shadow-sm overflow-auto" style={{ maxHeight: '35vh' }}>
                 <WorkflowResults results={results} agents={agents} />
               </div>

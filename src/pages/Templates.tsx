@@ -6,34 +6,40 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, FileCode, Search } from 'lucide-react';
-import { marketplaceItems } from '@/lib/marketPlaceData';
+import { templates } from '@/lib/templateData';
+import { agents } from '@/lib/data';
 import Transition from '@/components/animations/Transition';
 
 const Templates = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredTemplates, setFilteredTemplates] = useState(marketplaceItems);
+  const [filteredTemplates, setFilteredTemplates] = useState(templates);
 
   // Filter templates based on search query
   React.useEffect(() => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const filtered = marketplaceItems.filter(
+      const filtered = templates.filter(
         template => 
-          template.name.toLowerCase().includes(query) ||
+          template.title.toLowerCase().includes(query) ||
           template.description.toLowerCase().includes(query) ||
           template.category.toLowerCase().includes(query) ||
           template.tags.some(tag => tag.toLowerCase().includes(query))
       );
       setFilteredTemplates(filtered);
     } else {
-      setFilteredTemplates(marketplaceItems);
+      setFilteredTemplates(templates);
     }
   }, [searchQuery]);
 
   const handleUseTemplate = (templateId: string) => {
     // Navigate to workflow editor with the template ID
     navigate(`/workflow-editor?template=${templateId}`);
+  };
+
+  // Helper function to get agent objects from IDs
+  const getAgentsForTemplate = (template: typeof templates[0]) => {
+    return template.agentIds.map(id => agents.find(agent => agent.id === id)).filter(Boolean);
   };
 
   return (
@@ -51,7 +57,7 @@ const Templates = () => {
                 Ready-to-Use Workflow Templates
               </h1>
               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Get started quickly with pre-built workflows designed for common use cases.
+                Get started quickly with pre-built workflows combining multiple AI agents for common use cases.
                 Customize them to suit your specific needs.
               </p>
               <div className="max-w-lg mx-auto">
@@ -121,6 +127,20 @@ const Templates = () => {
                           </Badge>
                         ))}
                       </div>
+                      
+                      {/* Show agents included in the template */}
+                      <div className="mb-4">
+                        <h4 className="text-xs font-medium text-muted-foreground mb-2">Included Agents:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {getAgentsForTemplate(template).map(agent => agent && (
+                            <div key={agent.id} className="flex items-center gap-1.5 bg-muted/50 rounded-full px-2 py-0.5 text-xs">
+                              {agent.icon && <agent.icon size={10} className="text-primary" />}
+                              <span>{agent.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
                       <div className="mt-4 space-y-2">
                         {template.features?.slice(0, 2).map((feature, i) => (
                           <div key={i} className="flex items-start gap-2">

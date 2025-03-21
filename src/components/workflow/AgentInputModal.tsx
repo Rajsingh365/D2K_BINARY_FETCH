@@ -59,6 +59,8 @@ const AgentInputModal: React.FC<AgentInputModalProps> = ({
     fileInputRef.current?.click();
   };
 
+  console.log('Processing:', isProcessing);
+
   return (
     <Dialog open={isOpen} onOpenChange={isProcessing ? undefined : onClose}>
       <DialogContent className="sm:max-w-[500px]">

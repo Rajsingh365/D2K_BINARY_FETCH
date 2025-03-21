@@ -225,6 +225,7 @@ const WorkflowEditor = () => {
 
   const handleAgentInputSubmit = (inputText: string, files: File[]) => {
     setProcessingInput(true);
+    console.log('Submitting input:', inputText, files);
     processAgentInput(inputText, files);
     setProcessingInput(false);
   };

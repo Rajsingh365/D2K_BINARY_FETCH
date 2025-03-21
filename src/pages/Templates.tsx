@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ const Templates = () => {
   const [filteredTemplates, setFilteredTemplates] = useState(templates);
 
   // Filter templates based on search query
-  React.useEffect(() => {
+  useEffect(() => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const filtered = templates.filter(

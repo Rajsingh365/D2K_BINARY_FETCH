@@ -13,7 +13,7 @@ const Footer = ({ className }: { className?: string }) => {
               <div className="relative w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
                 <span>A</span>
               </div>
-              <span className="font-semibold text-lg">AI Flow</span>
+              <span className="font-semibold text-lg">AutomataX</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Build powerful AI workflows by connecting specialized agents to automate your tasks.
@@ -23,7 +23,7 @@ const Footer = ({ className }: { className?: string }) => {
           <div>
             <h3 className="font-medium mb-4 text-sm">Platform</h3>
             <ul className="space-y-3">
-              <li><Link to ="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link></li>
+              <li><Link to ="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link></li>
               <li><Link to ="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Templates</Link></li>
               <li><Link to ="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Custom Workflows</Link></li>
               <li><Link to ="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Integrations</Link></li>
@@ -53,7 +53,7 @@ const Footer = ({ className }: { className?: string }) => {
 
         <div className="pt-8 border-t flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} AI Flow. All rights reserved.
+            © {new Date().getFullYear()} AutomataX. All rights reserved.
           </p>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             <Link to ="#" className="text-muted-foreground hover:text-foreground transition-colors">

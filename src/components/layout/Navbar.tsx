@@ -52,7 +52,7 @@ const Navbar = () => {
           <Link to="/my-workflows" className="text-sm font-medium hover:text-primary transition-colors">
             My Workflows
           </Link>
-          <Link to="#" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link to="/templates" className="text-sm font-medium hover:text-primary transition-colors">
             Templates
           </Link>
           <Link to="#" className="text-sm font-medium hover:text-primary transition-colors">
@@ -94,13 +94,13 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md shadow-md p-4 animate-fade-in">
           <nav className="flex flex-col space-y-4 py-2">
-            <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
+            <Link to="/marketplace" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
               Marketplace
             </Link>
-            <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
+            <Link to="/my-workflows" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
               My Workflows
             </Link>
-            <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
+            <Link to="/templates" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
               Templates
             </Link>
             <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import WorkflowEditor from "./pages/WorkflowEditor";
 import Marketplace from "./pages/Marketplace";
 import MyWorkflows from "./pages/MyWorkflows";
+import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
 import RootLayout from "./pages/RootLayout";
 import {AuthProvider} from "./context/AuthUserContext";
@@ -62,15 +63,10 @@ const App = () => {
               <Route path="/workflow-editor" element={<WorkflowEditor />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/my-workflows" element={<MyWorkflows />} />
+              <Route path="/templates" element={<Templates />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Route>
-            {/* Future routes would go here */}
-            {/* <Route path="/templates" element={<Templates />} /> */}
-            {/* <Route path="/profile" element={<Profile />} /> */}
-            {/* <Route path="/signin" element={<SignIn />} /> */}
-            {/* <Route path="/signup" element={<SignUp />} /> */}
-            {/* Catch-all route */}
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

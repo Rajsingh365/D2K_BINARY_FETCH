@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import WorkflowEditor from "./pages/WorkflowEditor";
 import Marketplace from "./pages/Marketplace";
 import MyWorkflows from "./pages/MyWorkflows";
 import NotFound from "./pages/NotFound";
+import RootLayout from "./pages/RootLayout";
 
 const queryClient = new QueryClient();
 
@@ -18,26 +18,33 @@ const App = () => {
   useEffect(() => {
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const anchor = target.closest('a');
-      
-      if (anchor && anchor.hash && anchor.hash.startsWith('#') && anchor.origin + anchor.pathname === window.location.origin + window.location.pathname) {
+      const anchor = target.closest("a");
+
+      if (
+        anchor &&
+        anchor.hash &&
+        anchor.hash.startsWith("#") &&
+        anchor.origin + anchor.pathname ===
+          window.location.origin + window.location.pathname
+      ) {
         e.preventDefault();
-        
+
         const targetElement = document.querySelector(anchor.hash);
         if (targetElement) {
           window.scrollTo({
-            top: targetElement.getBoundingClientRect().top + window.scrollY - 100,
-            behavior: 'smooth'
+            top:
+              targetElement.getBoundingClientRect().top + window.scrollY - 100,
+            behavior: "smooth",
           });
-          
+
           // Update URL but don't scroll again
-          window.history.pushState(null, '', anchor.hash);
+          window.history.pushState(null, "", anchor.hash);
         }
       }
     };
-    
-    document.addEventListener('click', handleAnchorClick);
-    return () => document.removeEventListener('click', handleAnchorClick);
+
+    document.addEventListener("click", handleAnchorClick);
+    return () => document.removeEventListener("click", handleAnchorClick);
   }, []);
 
   return (
@@ -47,17 +54,19 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/workflow-editor" element={<WorkflowEditor />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/my-workflows" element={<MyWorkflows />} />
+            <Route path="/" element={<RootLayout />}>
+              <Route index element={<Index />} />
+              <Route path="/workflow-editor" element={<WorkflowEditor />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/my-workflows" element={<MyWorkflows />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
             {/* Future routes would go here */}
             {/* <Route path="/templates" element={<Templates />} /> */}
             {/* <Route path="/profile" element={<Profile />} /> */}
             {/* <Route path="/signin" element={<SignIn />} /> */}
             {/* <Route path="/signup" element={<SignUp />} /> */}
             {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

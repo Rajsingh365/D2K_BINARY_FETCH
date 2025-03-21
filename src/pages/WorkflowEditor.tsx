@@ -22,8 +22,6 @@ import { toast } from 'sonner';
 import '@xyflow/react/dist/style.css';
 import '../styles/workflow-editor.css';
 
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import AgentNode from '@/components/workflow/AgentNode';
 import AgentPanel from '@/components/workflow/AgentPanel';
 import { Agent, agents } from '@/lib/data';
@@ -47,7 +45,10 @@ const WorkflowEditor = () => {
   const navigate = useNavigate();
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({...params, animated: true}, eds)),
+    (params: Connection) => {
+      console.log('onConnect', params);
+      setEdges((eds) => addEdge(params, eds));
+      setEdges((eds) => addEdge({...params, animated: true}, eds))},
     [setEdges]
   );
 
@@ -81,7 +82,7 @@ const WorkflowEditor = () => {
         position,
         data: { agent },
       };
-
+      console.log('onDrop', newNode);
       setNodes((nds) => nds.concat(newNode));
       toast.success(`Added ${agent.name} to workflow`);
     },
@@ -95,6 +96,7 @@ const WorkflowEditor = () => {
       nodes,
       edges,
     };
+    
     console.log('Saving workflow:', flow);
     localStorage.setItem('savedWorkflow', JSON.stringify(flow));
     toast.success('Workflow saved successfully!');
@@ -116,11 +118,8 @@ const WorkflowEditor = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
-      <Navbar />
-      
-      <main className="flex-grow pt-20">
+  return (      
+      <main className="flex-grow pt-20 bg-muted/30">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center mb-6">
             <Button 
@@ -191,7 +190,7 @@ const WorkflowEditor = () => {
                 <Controls className="m-4" />
                 <MiniMap className="m-4" />
                 {/* Fix for TypeScript error: Use BackgroundVariant.Dots instead of BackgroundVariant.DOTS */}
-                <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+                {/* <Background variant={BackgroundVariant.Dots} gap={12} size={1} /> */}
                 <Panel position="top-left" className="m-4 bg-background p-3 rounded-md shadow-sm border">
                   <p className="text-xs text-muted-foreground">
                     Drag agents from the left panel and connect them to create your workflow.
@@ -202,9 +201,6 @@ const WorkflowEditor = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
   );
 };
 

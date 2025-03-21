@@ -125,7 +125,7 @@ const marketplaceItems: MarketplaceItem[] = [
     tags: ['Support', 'Customer Service', 'Automation'],
     seller: {
       name: 'Support Solutions',
-      rating: 4.5,
+      rating: 1.5,
       verified: true,
     },
   },
@@ -150,6 +150,8 @@ const Marketplace = () => {
 
   useEffect(() => {
     let filtered = marketplaceItems;
+
+    console.log('searchQuery', searchQuery);
     
     // Apply search filter
     if (searchQuery) {
@@ -190,9 +192,14 @@ const Marketplace = () => {
     setFilteredItems(filtered);
   }, [searchQuery, selectedCategory, sortOption]);
 
+
+  const handleResetFilters = () =>{
+    setSearchQuery('');
+    setSelectedCategory(null);
+    setSortOption('popular');
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
       
       <main className="flex-grow pt-24 pb-16">
         {/* Hero Section */}
@@ -248,7 +255,7 @@ const Marketplace = () => {
                 .filter(item => item.featured)
                 .slice(0, 3)
                 .map((item, index) => (
-                  <Transition key={item.id} delay={index * 100}>
+                  <Transition key={item.id} delay={index * 200}>
                     <Card className="group overflow-hidden border-2 hover:border-primary/50 transition-all duration-300">
                       <div className="relative h-48 overflow-hidden">
                         <img 
@@ -423,7 +430,7 @@ const Marketplace = () => {
                     </div>
 
                     <div className="pt-2">
-                      <Button variant="outline" className="w-full justify-center">
+                      <Button variant="outline" className="w-full justify-center" onClick={handleResetFilters}>
                         Reset Filters
                       </Button>
                     </div>
@@ -512,6 +519,7 @@ const Marketplace = () => {
                         onClick={() => {
                           setSearchQuery('');
                           setSelectedCategory(null);
+                          setFilteredItems(marketplaceItems);
                         }}
                       >
                         Clear All Filters
@@ -553,9 +561,6 @@ const Marketplace = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
   );
 };
 

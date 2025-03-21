@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -26,26 +27,26 @@ const Navbar = () => {
       )}
     >
       <div className="container flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <div className="relative w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
             <span className="animate-pulse-subtle">A</span>
           </div>
-          <span className="font-semibold text-lg">AI Flow</span>
-        </a>
+          <span className="font-semibold text-lg">AutomataX</span>
+        </Link>
 
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link to="/marketplace" className="text-sm font-medium hover:text-primary transition-colors">
             Marketplace
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
+          </Link>
+          <Link to="/my-workflows" className="text-sm font-medium hover:text-primary transition-colors">
             My Workflows
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
+          </Link>
+          <Link to="#" className="text-sm font-medium hover:text-primary transition-colors">
             Templates
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors">
+          </Link>
+          <Link to="#" className="text-sm font-medium hover:text-primary transition-colors">
             Developers
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -73,18 +74,18 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md shadow-md p-4 animate-fade-in">
           <nav className="flex flex-col space-y-4 py-2">
-            <a href="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
+            <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
               Marketplace
-            </a>
-            <a href="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
+            </Link>
+            <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
               My Workflows
-            </a>
-            <a href="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
+            </Link>
+            <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
               Templates
-            </a>
-            <a href="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
+            </Link>
+            <Link to="#" className="px-3 py-2 text-sm font-medium hover:bg-secondary rounded-md transition-colors">
               Developers
-            </a>
+            </Link>
             <div className="pt-2 border-t">
               <Button variant="default" size="sm" className="w-full">
                 Sign In

@@ -1,8 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,134 +9,11 @@ import CategoryFilter from '@/components/marketplace/CategoryFilter';
 import Transition from '@/components/animations/Transition';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Star, ArrowRight, Filter, ArrowDownAZ, TrendingUp, Zap, Shield, Star as StarIcon, Tag, Clock, Search } from 'lucide-react';
+import {marketplaceItems, MarketplaceItem, categories} from '@/lib/marketPlaceData';
 
-// Define marketplace item type
-interface MarketplaceItem {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  rating: number;
-  image: string;
-  category: string;
-  featured: boolean;
-  tags: string[];
-  seller: {
-    name: string;
-    rating: number;
-    verified: boolean;
-  };
-}
-
-// Sample data for the marketplace
-const marketplaceItems: MarketplaceItem[] = [
-  {
-    id: '1',
-    title: 'Content Generator Pro',
-    description: 'Generate blog posts, social media content, and marketing copy with advanced AI.',
-    price: 49.99,
-    rating: 4.7,
-    image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    category: 'Marketing',
-    featured: true,
-    tags: ['Content', 'AI Writer', 'Marketing'],
-    seller: {
-      name: 'AI Solutions Inc',
-      rating: 4.8,
-      verified: true,
-    },
-  },
-  {
-    id: '2',
-    title: 'Data Analysis Suite',
-    description: 'Analyze large datasets, generate insights, and create visualization reports automatically.',
-    price: 79.99,
-    rating: 4.5,
-    image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    category: 'Analytics',
-    featured: true,
-    tags: ['Data', 'Analytics', 'Visualization'],
-    seller: {
-      name: 'Data Masterminds',
-      rating: 4.6,
-      verified: true,
-    },
-  },
-  {
-    id: '3',
-    title: 'AI Meeting Assistant',
-    description: 'Transcribe, summarize, and extract action items from your meetings automatically.',
-    price: 39.99,
-    rating: 4.6,
-    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    category: 'Productivity',
-    featured: false,
-    tags: ['Meetings', 'Transcription', 'Notes'],
-    seller: {
-      name: 'Productivity Tools Co',
-      rating: 4.4,
-      verified: true,
-    },
-  },
-  {
-    id: '4',
-    title: 'Legal Document Scanner',
-    description: 'Review legal documents, identify risks, and suggest improvements with AI assistance.',
-    price: 89.99,
-    rating: 4.3,
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    category: 'Legal',
-    featured: false,
-    tags: ['Legal', 'Documents', 'Compliance'],
-    seller: {
-      name: 'LegalTech Solutions',
-      rating: 4.7,
-      verified: true,
-    },
-  },
-  {
-    id: '5',
-    title: 'Research Assistant',
-    description: 'Find, summarize, and cite academic papers for your research projects.',
-    price: 59.99,
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    category: 'Research',
-    featured: true,
-    tags: ['Research', 'Academic', 'Citations'],
-    seller: {
-      name: 'Academic AI Tools',
-      rating: 4.9,
-      verified: true,
-    },
-  },
-  {
-    id: '6',
-    title: 'Customer Service AI',
-    description: 'Automate customer support with an AI agent that handles common queries and tickets.',
-    price: 69.99,
-    rating: 4.4,
-    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    category: 'Customer Support',
-    featured: false,
-    tags: ['Support', 'Customer Service', 'Automation'],
-    seller: {
-      name: 'Support Solutions',
-      rating: 1.5,
-      verified: true,
-    },
-  },
-];
 
 // Available categories for filtering
-const categories = [
-  'Marketing',
-  'Analytics', 
-  'Productivity', 
-  'Legal', 
-  'Research', 
-  'Customer Support'
-];
+
 
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState('');

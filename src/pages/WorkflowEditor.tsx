@@ -24,7 +24,8 @@ import '../styles/workflow-editor.css';
 
 import AgentNode from '@/components/workflow/AgentNode';
 import AgentPanel from '@/components/workflow/AgentPanel';
-import { Agent, agents } from '@/lib/data';
+// import { Agent, agents } from '@/lib/data';
+import { MarketplaceItem as Agent, marketplaceItems as agents } from '@/lib/marketPlaceData';
 import { Button } from '@/components/ui/button';
 import { Save, Share2, Play, ArrowLeft, Trash2, Zap } from 'lucide-react';
 
@@ -63,6 +64,7 @@ const WorkflowEditor = () => {
 
       const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
       const agentId = event.dataTransfer.getData('application/agentNode');
+      console.log('onDrop', agentId);
       
       if (!reactFlowBounds || !agentId || !reactFlowInstance) {
         return;

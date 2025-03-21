@@ -4,21 +4,22 @@ import { Agent } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRight } from 'lucide-react';
+import { MarketplaceItem } from '@/lib/marketPlaceData';
+import { useAuthUser } from './../../context/AuthUserContext';
 
-interface AgentPanelProps {
-  agents: Agent[];
-}
 
-const AgentPanel: React.FC<AgentPanelProps> = ({ agents }) => {
+const AgentPanel = () => {
   const onDragStart = (event: React.DragEvent<HTMLDivElement>, agent: Agent) => {
     event.dataTransfer.setData('application/agentNode', agent.id);
     event.dataTransfer.effectAllowed = 'move';
   };
+  const { usersAgent, setUsersAgent } = useAuthUser();
+  console.log('usersAgent', usersAgent);
 
   return (
     <ScrollArea className="h-full pr-4">
       <div className="space-y-3">
-        {agents.map((agent) => (
+        {usersAgent?.map((agent: MarketplaceItem) => (
           <div
             key={agent.id}
             className="agent-panel-item bg-background rounded-lg p-3 flex items-center gap-3 cursor-grab hover:shadow-sm transition-all border border-muted hover:border-primary/20 relative group"

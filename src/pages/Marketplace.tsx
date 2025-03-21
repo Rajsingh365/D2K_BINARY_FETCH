@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import CategoryFilter from '@/components/marketplace/CategoryFilter';
-import SearchBar from '@/components/ui/SearchBar';
 import Transition from '@/components/animations/Transition';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Star, ArrowRight, Filter, ArrowDownAZ, TrendingUp, Zap, Shield, Star as StarIcon, Tag, Clock, Search } from 'lucide-react';

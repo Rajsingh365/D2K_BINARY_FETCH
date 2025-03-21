@@ -1,22 +1,33 @@
-
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import Authentication from '../auth/Authentication';
+import { useAuthUser } from '@/context/AuthUserContext';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/configs/FirebaseConfig';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { authUser, setAuthUser } = useAuthUser();
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 10);
+      setIsScrolled(window.scrollY > 10);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setAuthUser(user);
+      console.log('Auth User:', user.photoURL);
+    });
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -55,22 +66,31 @@ const Navbar = () => {
             <span>Search</span>
           </Button>
 
-          <Button variant="default" size="sm" className="hidden md:inline-flex">
-            Sign In
-          </Button>
+          {authUser ? (
+            <Link to="/profile" className="flex items-center gap-2">
+              {authUser?.photoURL ? (
+                <img src={authUser?.photoURL} alt="Profile" className="w-8 h-8 rounded-full" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-medium">
+                  {authUser.displayName ? authUser.displayName[0] : <User size={16} />}
+                </div>
+              )}
+              <span className="hidden md:inline text-sm font-medium">{authUser.displayName || 'Profile'}</span>
+            </Link>
+          ) : (
+            <Authentication>
+              <Button variant="default" size="sm" className="hidden md:inline-flex">
+                Sign In
+              </Button>
+            </Authentication>
+          )}
 
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden" 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </Button>
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md shadow-md p-4 animate-fade-in">
           <nav className="flex flex-col space-y-4 py-2">
@@ -87,9 +107,13 @@ const Navbar = () => {
               Developers
             </Link>
             <div className="pt-2 border-t">
-              <Button variant="default" size="sm" className="w-full">
-                Sign In
-              </Button>
+              {authUser ? (
+                <Link to="/profile" className="block text-center py-2 font-medium text-primary">Profile</Link>
+              ) : (
+                <Button variant="default" size="sm" className="w-full">
+                  Sign In
+                </Button>
+              )}
             </div>
           </nav>
         </div>

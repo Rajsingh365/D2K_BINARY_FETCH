@@ -10,6 +10,8 @@ import Marketplace from "./pages/Marketplace";
 import MyWorkflows from "./pages/MyWorkflows";
 import NotFound from "./pages/NotFound";
 import RootLayout from "./pages/RootLayout";
+import {AuthProvider} from "./context/AuthUserContext";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -59,6 +62,7 @@ const App = () => {
               <Route path="/workflow-editor" element={<WorkflowEditor />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/my-workflows" element={<MyWorkflows />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Route>
             {/* Future routes would go here */}
@@ -70,6 +74,7 @@ const App = () => {
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

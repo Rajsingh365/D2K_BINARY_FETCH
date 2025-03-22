@@ -1,4 +1,11 @@
-import { BarChart, FileSearch, FileText, Scroll, Search,LucideIcon  } from "lucide-react";
+import {
+  BarChart,
+  FileSearch,
+  FileText,
+  Scroll,
+  Search,
+  LucideIcon,
+} from "lucide-react";
 
 export interface Agent {
   id: number;
@@ -36,13 +43,25 @@ export interface Agent {
   implementation_path: string;
 }
 
-
+// Add this fallback if needed elsewhere
+export const createFallbackAgent = (
+  id: number | string,
+  name: string = "Unknown Agent"
+): Agent => {
+  return {
+    id: typeof id === "string" ? parseInt(id) : id,
+    name,
+    description: "A dragged agent",
+    type: "Custom",
+    color: "gray",
+  };
+};
 
 export const categories = [
-  'Marketing',
-  'Analytics', 
-  'Productivity', 
-  'Legal', 
-  'Research', 
-  'Customer Support'
+  "marketing",         // SEO Optimizer
+  "productivity",      // Meeting Summarizer, Smart Email Manager, Zoom Meeting Scheduler
+  "content",           // Grammar and Style Checker
+  "automation",        // Smart Email Manager
+  "scheduling",        // Zoom Meeting Scheduler
+  "writing"            // Grammar and Style Checker
 ];

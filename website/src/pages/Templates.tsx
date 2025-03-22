@@ -40,7 +40,7 @@ const Templates = () => {
   useEffect(()=> {
         const fetchAgents = async () => {
           try{
-          const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents`);
+          const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents/`);
           const data = await response.json();
           console.log('data', data);
           

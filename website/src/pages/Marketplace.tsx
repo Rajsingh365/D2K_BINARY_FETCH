@@ -53,7 +53,7 @@ const Marketplace = () => {
   useEffect(()=> {
       const fetchMarketplaceItems = async () => {
         try{
-        const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents`);
+        const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents/`);
         const data = await response.json();
         console.log('data', data);
         
@@ -77,7 +77,7 @@ const Marketplace = () => {
     let filtered = marketPlaceItems.filter(
       (item) =>
         !usersAgent?.some(
-          (agentItem: Agent) => agentItem.id === item.id
+          (agentItem: Agent) => agentItem.id == item.id
         )
     );
     // console.log('filtered', filtered);
@@ -98,6 +98,8 @@ const Marketplace = () => {
 
     // Apply category filter
     if (selectedCategory) {
+      console.log('category', selectedCategory);
+      console.log('items', filteredItems);
       filtered = filtered.filter((item) => item.category === selectedCategory);
     }
 
@@ -123,7 +125,7 @@ const Marketplace = () => {
     }
 
     setFilteredItems(filtered);
-  }, [searchQuery, selectedCategory, sortOption]);
+  }, [searchQuery, selectedCategory, sortOption, marketPlaceItems, usersAgent]);
 
   const handleResetFilters = () => {
     setSearchQuery("");

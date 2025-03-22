@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -131,6 +130,28 @@ export default {
 					'50%': {
 						opacity: '0.8'
 					}
+				},
+				'drag-indicator': {
+					'0%': {
+						transform: 'scale(1)',
+						opacity: '0.5'
+					},
+					'50%': {
+						transform: 'scale(1.1)',
+						opacity: '0.8'
+					},
+					'100%': {
+						transform: 'scale(1)',
+						opacity: '0.5'
+					}
+				},
+				'drop-zone-active': {
+					'0%': {
+						boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.3)'
+					},
+					'100%': {
+						boxShadow: '0 0 0 8px rgba(59, 130, 246, 0)'
+					}
 				}
 			},
 			animation: {
@@ -140,7 +161,9 @@ export default {
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.4s ease-out',
 				'card-hover': 'card-hover 0.3s ease-out forwards',
-				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite'
+				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
+				'drag-indicator': 'drag-indicator 1.5s ease-in-out infinite',
+				'drop-zone-active': 'drop-zone-active 1.5s ease-in-out infinite'
 			},
 			fontFamily: {
 				sans: [

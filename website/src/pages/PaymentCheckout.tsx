@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MarketplaceItem } from "@/lib/marketPlaceData";
+import { Agent } from "@/lib/marketPlaceData";
 import Transition from "@/components/animations/Transition";
 import {loadStripe} from '@stripe/stripe-js';
 
@@ -28,9 +28,9 @@ const PaymentCheckout = () => {
   const navigate = useNavigate();
 
   // Function to remove an item from the cart
-  const handleRemoveFromCart = (itemId: string) => {
+  const handleRemoveFromCart = (itemId: number) => {
     const updatedCart = cartAgent.filter(
-      (item: MarketplaceItem) => item.id !== itemId
+      (item: Agent) => item.id !== itemId
     );
     setCartAgent(updatedCart);
   };
@@ -38,7 +38,7 @@ const PaymentCheckout = () => {
   // Calculate the total price
   const calculateTotal = () => {
     return cartAgent.reduce(
-      (total: number, item: MarketplaceItem) => total + item.price,
+      (total: number, item: Agent) => total + item.price,
       0
     );
   };
@@ -120,7 +120,7 @@ const PaymentCheckout = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {cartAgent.map((item: MarketplaceItem, index: number) => (
+                    {cartAgent.map((item: Agent, index: number) => (
                       <div key={item.id}>
                         <div className="flex gap-4 py-4">
                           <div className="w-24 h-24 rounded-md overflow-hidden flex-shrink-0">
@@ -196,7 +196,7 @@ const PaymentCheckout = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {cartAgent.map((item: MarketplaceItem) => (
+                      {cartAgent.map((item: Agent) => (
                         <div
                           key={item.id}
                           className="flex justify-between items-center"

@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Agent } from '@/lib/data';
+import { Agent } from '@/lib/marketPlaceData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Circle } from 'lucide-react';
 
 export interface AgentResult {
-  agentId: string;
+  agentId: string | number;
   input: string;
   output: string;
   status: 'waiting' | 'processing' | 'completed' | 'error';
@@ -24,11 +24,13 @@ const WorkflowResults: React.FC<WorkflowResultsProps> = ({ results, agents }) =>
       <h3 className="text-lg font-medium">Workflow Results</h3>
       <div className="space-y-4">
         {results.map((result) => {
-          const agent = agents.find(a => a.id === result.agentId);
+          // Handle both string and number IDs by converting to string for comparison
+          const resultIdString = String(result.agentId);
+          const agent = agents.find(a => String(a.id) === resultIdString);
           if (!agent) return null;
 
           return (
-            <Card key={result.agentId} className="overflow-hidden">
+            <Card key={resultIdString} className="overflow-hidden">
               <CardHeader className={`bg-${agent.color}-50/50 py-3`}>
                 <CardTitle className="text-sm flex items-center gap-2">
                   {result.status === 'completed' ? (

@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ReactFlow,
   MiniMap,
@@ -25,11 +25,10 @@ import AgentPanel from '@/components/workflow/AgentPanel';
 import InputModal from '@/components/workflow/InputModal';
 import WorkflowResults from '@/components/workflow/WorkflowResults';
 import { useWorkflowExecution } from '@/hooks/useWorkflowExecution';
-// import { agents, Agent } from '@/lib/data';
-import {Agent} from '@/lib/marketPlaceData';
+import { Agent } from '@/lib/marketPlaceData';
 import { templates } from '@/lib/templateData';
 import { Button } from '@/components/ui/button';
-import { Save, Share2, Play, ArrowLeft, Trash2, Zap, StopCircle } from 'lucide-react';
+import { Save, Share2, Play, ArrowLeft, Trash2, Zap, StopCircle, Mic } from 'lucide-react';
 import { useWorkflows, Workflow } from '@/context/WorkflowContext';
 
 // Define custom node types
@@ -47,22 +46,30 @@ const WorkflowEditor = () => {
   const [currentWorkflowId, setCurrentWorkflowId] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [agents, setAgents]= useState<Agent[]>([]);
-    useEffect(()=> {
-          const fetchAgents = async () => {
-            try{
-            const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents`);
-            const data = await response.json();
-            console.log('data', data);
-            
-            setAgents(data);
-        }
-        catch(err){
-          console.log(err);
-        }
+  const [searchParams] = useState(new URLSearchParams(location.search));
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  
+  const { addWorkflow, updateWorkflow, getWorkflow } = useWorkflows();
+
+  useEffect(()=> {
+    const fetchAgents = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents`);
+        const data = await response.json();
+        console.log('data', data);
+        
+        setAgents(data);
       }
-        fetchAgents();
-      }, [])
+      catch(err){
+        console.log(err);
+      }
+    };
+    fetchAgents();
+  }, []);
 
   // Workflow execution state
   const {
@@ -150,6 +157,45 @@ const WorkflowEditor = () => {
     }
   }, [currentAgent, showResults]);
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        setAudioBlob(audioBlob);
+        
+        // Close all audio tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+      toast.info('Recording started');
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast.error('Could not access microphone');
+    }
+  };
+  
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      toast.success('Recording completed');
+    }
+  };
+
   const loadTemplate = (templateId: string) => {
     const template = templates.find(t => t.id === templateId);
     
@@ -221,13 +267,16 @@ const WorkflowEditor = () => {
       event.preventDefault();
 
       const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
-      const agentId = Number(event.dataTransfer.getData('application/agentNode'));
+      const agentId = event.dataTransfer.getData('application/agentNode');
+      
+      console.log('Data transferred:', agentId);
       
       if (!reactFlowBounds || !agentId || !reactFlowInstance) {
         return;
       }
 
-      const agent = agents.find(a => a.id == agentId);
+      const numericAgentId = parseInt(agentId);
+      const agent = agents.find(a => a.id === numericAgentId);
       console.log('Dropped agent:', agent);
       if (!agent) return;
 
@@ -246,7 +295,7 @@ const WorkflowEditor = () => {
       setNodes((nds) => nds.concat(newNode));
       toast.success(`Added ${agent.name} to workflow`);
     },
-    [reactFlowInstance, setNodes]
+    [reactFlowInstance, setNodes, agents]
   );
 
   const handleSaveWorkflow = () => {
@@ -334,6 +383,13 @@ const WorkflowEditor = () => {
       }
     });
     
+    // Add audio recording if available
+    if (audioBlob) {
+      const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+      files.push(audioFile);
+      setAudioBlob(null); // Clear the audio blob after using it
+    }
+    
     console.log('Submitting form data:', {
       text: inputText,
       files: files.map(f => f.name)
@@ -396,6 +452,26 @@ const WorkflowEditor = () => {
               <Save size={16} className="mr-1" />
               Save
             </Button>
+            {isRecording ? (
+              <Button 
+                size="sm" 
+                variant="destructive"
+                onClick={stopRecording}
+              >
+                <StopCircle size={16} className="mr-1" />
+                Stop Recording
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={startRecording}
+                disabled={isRunning}
+              >
+                <Mic size={16} className="mr-1" />
+                Record Voice
+              </Button>
+            )}
             {isRunning ? (
               <Button 
                 size="sm" 

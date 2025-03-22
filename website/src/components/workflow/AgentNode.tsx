@@ -1,7 +1,7 @@
 
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Agent } from '@/lib/data';
+import { Agent } from '@/lib/marketPlaceData';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -10,9 +10,10 @@ interface AgentNodeProps {
     agent: Agent;
   };
   selected: boolean;
+  id: string;
 }
 
-const AgentNode = memo(({ data, selected }: AgentNodeProps) => {
+const AgentNode = memo(({ data, selected, id }: AgentNodeProps) => {
   const { agent } = data;
   
   return (
@@ -28,7 +29,7 @@ const AgentNode = memo(({ data, selected }: AgentNodeProps) => {
           "rounded-md w-8 h-8 flex items-center justify-center",
           `bg-${agent.color}-100`
         )}>
-          {agent.icon && <agent.icon size={16} className={`text-${agent.color}-500`} />}
+          {agent.icon && typeof agent.icon !== 'string' && <agent.icon size={16} className={`text-${agent.color}-500`} />}
         </div>
         <div>
           <h4 className="font-medium text-sm">{agent.name}</h4>

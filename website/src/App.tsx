@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,7 +13,10 @@ import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
 import RootLayout from "./pages/RootLayout";
 import {AuthProvider} from "./context/AuthUserContext";
+import { WorkflowProvider } from "./context/WorkflowContext";
 import Profile from "./pages/Profile";
+import PaymentCheckout from "./pages/PaymentCheckout";
+import Success from "./pages/Success";
 
 const queryClient = new QueryClient();
 
@@ -53,23 +57,28 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<RootLayout />}>
-              <Route index element={<Index />} />
-              <Route path="/workflow-editor" element={<WorkflowEditor />} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/my-workflows" element={<MyWorkflows />} />
-              <Route path="/templates" element={<Templates />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+        <WorkflowProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<RootLayout />}>
+                  <Route index element={<Index />} />
+                  <Route path="/workflow-editor" element={<WorkflowEditor />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/my-workflows" element={<MyWorkflows />} />
+                  <Route path="/templates" element={<Templates />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/cart" element={<PaymentCheckout/>}/>
+                  <Route path="/success" element={<Success/>}/> 
+                  <Route path="/cancel" element={<Success/>}/>
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </WorkflowProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

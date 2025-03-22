@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Search, Menu, X, User } from 'lucide-react';
+import { Search, Menu, X, User, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Authentication from '../auth/Authentication';
@@ -11,7 +11,7 @@ import { auth } from '@/configs/FirebaseConfig';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { authUser, setAuthUser } = useAuthUser();
+  const { authUser, setAuthUser, cartAgent } = useAuthUser();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,10 +25,13 @@ const Navbar = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setAuthUser(user);
-      console.log('Auth User:', user.photoURL);
+      console.log('Auth User:', user?.photoURL);
     });
     return () => unsubscribe();
   }, []);
+
+  console.log('Auth User:',
+    authUser?.photoURL,);
 
   return (
     <header
@@ -65,6 +68,16 @@ const Navbar = () => {
             <Search size={16} />
             <span>Search</span>
           </Button>
+
+          {authUser && (
+    <Link to="/cart" className="flex items-center gap-2 relative">
+        <ShoppingCart className="w-6 h-6" />
+
+        <div className="absolute -top-2 -right-2 w-4 h-4 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full">
+            {cartAgent?.length} 
+        </div>
+    </Link>
+)}
 
           {authUser ? (
             <Link to="/profile" className="flex items-center gap-2">

@@ -292,6 +292,7 @@ const AgentInputModal: React.FC<AgentInputModalProps> = ({
                   onChange={handleFileChange}
                   className="hidden"
                   multiple
+                  accept=".pdf,.txt,.jpg,.jpeg,.png"
                 />
                 <Paperclip size={18} className={files.length > 0 ? 'text-primary' : ''} />
               </Button>

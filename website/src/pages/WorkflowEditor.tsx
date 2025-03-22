@@ -46,7 +46,6 @@ const WorkflowEditor = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-
   // Workflow execution state
   const {
     isRunning,
@@ -239,9 +238,18 @@ const WorkflowEditor = () => {
     // For now we'll use the mock processing with a delay
     processAgentInput(inputText, files);
     
+    // In a real implementation, you'd send the formData to your backend API
+    // Example:
+    // const response = await fetch('/api/agent/process', {
+    //   method: 'POST',
+    //   body: formData,
+    // });
+    // const result = await response.json();
+    // processAgentInput(result.input, result.files);
+    
     setTimeout(() => {
       setProcessingInput(false);
-    }, 5000);
+    }, 3000);
   };
 
   // Get the current result for the modal
@@ -384,7 +392,7 @@ const WorkflowEditor = () => {
         </div>
       </div>
 
-      {/* Enhanced Agent Input Modal with chatbot interface */}
+      {/* Single chatbot-like modal that handles all agent interactions */}
       {activeAgent && (
         <AgentInputModal
           agent={activeAgent}

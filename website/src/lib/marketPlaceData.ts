@@ -1,4 +1,4 @@
-import { BarChart, FileSearch, FileText, Scroll, Search,  } from "lucide-react";
+import { BarChart, FileSearch, FileText, Scroll, Search,LucideIcon  } from "lucide-react";
 
 export interface MarketplaceItem {
   id: string;
@@ -8,7 +8,7 @@ export interface MarketplaceItem {
   type: string;
   category: string;
   features: string[];
-  icon: any;
+  icon: LucideIcon;
   color: string;
   price: number;
   rating: number;

@@ -11,8 +11,7 @@ import { auth } from '@/configs/FirebaseConfig';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { authUser, setAuthUser } = useAuthUser();
-  const { cartAgent } = useAuthUser();
+  const { authUser, setAuthUser, cartAgent } = useAuthUser();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,10 +25,13 @@ const Navbar = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setAuthUser(user);
-      console.log('Auth User:', user.photoURL);
+      console.log('Auth User:', user?.photoURL);
     });
     return () => unsubscribe();
   }, []);
+
+  console.log('Auth User:',
+    authUser?.photoURL,);
 
   return (
     <header

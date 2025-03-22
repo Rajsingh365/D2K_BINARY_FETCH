@@ -3,7 +3,7 @@ import React from 'react';
 import { Agent } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronRight } from 'lucide-react';
+import { Bot, ChevronRight } from 'lucide-react';
 import { MarketplaceItem } from '@/lib/marketPlaceData';
 import { useAuthUser } from './../../context/AuthUserContext';
 
@@ -27,11 +27,18 @@ const AgentPanel = () => {
             onDragStart={(event) => onDragStart(event, agent)}
           >
             <div className={cn(
-              "rounded-md w-10 h-10 flex items-center justify-center",
-              `bg-${agent.color}-50`
-            )}>
-              {agent.icon && <agent.icon size={18} className={`text-${agent.color}-500`} />}
-            </div>
+  "rounded-md w-10 h-10 flex items-center justify-center",
+  `bg-${agent.color}-50`
+)}>
+  {agent.icon && typeof agent.icon === "function" ? (
+    <agent.icon size={18} className={`text-${agent.color}-500`} />
+  ) : (
+    <Bot 
+      size={18} 
+      className={`text-${agent.color}`}
+    />
+  )}
+</div>
             <div className="flex-1 min-w-0">
               <h4 className="font-medium text-sm truncate">{agent.name}</h4>
               <p className="text-xs text-muted-foreground truncate">{agent.type}</p>

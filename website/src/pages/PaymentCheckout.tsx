@@ -46,7 +46,8 @@ const PaymentCheckout = () => {
   // Handle the checkout process
   const handleCheckout = () => {
     // Add cart items to user's agents
-   
+    setUsersAgent([...usersAgent, ...cartAgent]);
+    setCartAgent([]); 
     // Show success notification or redirect
     alert("Purchase successful! Agents have been added to your account.");
     navigate("/marketplace");
@@ -54,6 +55,9 @@ const PaymentCheckout = () => {
 
   const makePayment = async () => {
     const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+    localStorage.setItem("pendingCart", JSON.stringify(cartAgent));
+
     const response = await fetch(`${import.meta.env.VITE_NODE_BACKEND_URL}/api/payment/create-checkout-session`, {
       method: "POST",
       headers: {

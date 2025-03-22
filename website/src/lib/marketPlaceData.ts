@@ -1,4 +1,4 @@
-import { BarChart, FileSearch, FileText, Scroll, Search } from "lucide-react";
+import { BarChart, FileSearch, FileText, Scroll, Search,  } from "lucide-react";
 
 export interface MarketplaceItem {
   id: string;

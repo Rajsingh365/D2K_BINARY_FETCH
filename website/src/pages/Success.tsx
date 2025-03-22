@@ -1,14 +1,23 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
+import { useAuthUser } from "@/context/AuthUserContext";
 
 const Success: React.FC = () => {
   const navigate = useNavigate();
+  const { usersAgent, setUsersAgent, setCartAgent } = useAuthUser();
 
   useEffect(() => {
-    // Scroll to top when component mounts
-    window.scrollTo(0, 0);
+    const pendingCart = JSON.parse(localStorage.getItem("pendingCart") || "[]");
+    console.log('pendingCart', pendingCart);
+    if (pendingCart.length > 0) {
+      setUsersAgent([...usersAgent, ...pendingCart]);
+      setCartAgent([]); // Clear cart after updating users' agents
+      localStorage.removeItem("pendingCart");
+      window.scrollTo(0, 0);
+    }
   }, []);
+  console.log('usersAgent', usersAgent[0]?.icon);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">

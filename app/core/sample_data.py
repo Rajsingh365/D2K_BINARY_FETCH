@@ -3,6 +3,19 @@ Sample data generator for populating the database with initial agents and templa
 This is useful for demo/hackathon purposes.
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Add the project root to the Python path when running this file directly
+if __name__ == "__main__":
+    # Get the absolute path to the project root directory
+    project_root = str(Path(__file__).parent.parent.parent)
+
+    # Add the project root to the Python path if it's not already there
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+
 from sqlalchemy.orm import Session
 from app.db.models import Agent, Workflow, WorkflowAgent
 
@@ -144,6 +157,83 @@ def create_sample_data(db: Session):
             },
             implementation="app.agents.grammar_and_style_checker.GrammarAndStyleChecker",
         ),
+        # Add the Zoom Meeting Scheduler agent
+        Agent(
+            name="Zoom Meeting Scheduler",
+            description="Schedules zoom meetings based on provided information",
+            category="productivity",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "meeting_title": {
+                        "type": "string",
+                        "description": "Title of the meeting",
+                    },
+                    "participants": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of email addresses of participants",
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start time of the meeting in ISO format",
+                    },
+                    "duration": {
+                        "type": "integer",
+                        "description": "Duration of meeting in minutes",
+                    },
+                    "agenda": {
+                        "type": "string",
+                        "description": "Meeting agenda/description",
+                    },
+                },
+                "required": ["meeting_title", "participants", "start_time", "duration"],
+            },
+            output_schema={
+                "type": "object",
+                "properties": {
+                    "meeting_id": {
+                        "type": "string",
+                        "description": "ID of the scheduled meeting",
+                    },
+                    "join_url": {
+                        "type": "string",
+                        "description": "URL for participants to join the meeting",
+                    },
+                    "start_url": {
+                        "type": "string",
+                        "description": "URL for the host to start the meeting",
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Status of the meeting creation",
+                    },
+                },
+            },
+            config_schema={
+                "type": "object",
+                "properties": {
+                    "use_pmi": {
+                        "type": "boolean",
+                        "description": "Whether to use Personal Meeting ID",
+                        "default": False,
+                    },
+                    "auto_recording": {
+                        "type": "string",
+                        "enum": ["none", "local", "cloud"],
+                        "default": "none",
+                        "description": "Automatic recording option",
+                    },
+                    "mute_upon_entry": {
+                        "type": "boolean",
+                        "default": True,
+                        "description": "Whether to mute participants upon entry",
+                    },
+                },
+            },
+            implementation="app.agents.zoom_meeting_scheduler.ZoomMeetingScheduler",
+        ),
     ]
 
     for agent in agents:
@@ -181,6 +271,24 @@ def create_sample_data(db: Session):
                 },
             ],
         },
+        {
+            "name": "Meeting Management Suite",
+            "description": "Schedule, prepare, and follow up on meetings efficiently",
+            "category": "productivity",
+            "is_template": True,
+            "agents": [
+                {
+                    "agent_name": "Zoom Meeting Scheduler",
+                    "order": 1,
+                    "config": {"mute_upon_entry": True, "auto_recording": "cloud"},
+                },
+                {
+                    "agent_name": "Meeting Summarizer",
+                    "order": 2,
+                    "config": {"summary_length": "medium", "extract_actions": True},
+                },
+            ],
+        },
     ]
 
     for workflow_data in workflows:
@@ -211,3 +319,21 @@ def create_sample_data(db: Session):
 
     # Commit all changes
     db.commit()
+
+
+# Allow running this file directly for testing
+if __name__ == "__main__":
+    from app.db.database import SessionLocal, engine
+    from app.db.models import Base
+
+    # Create database tables first
+    print("Creating database tables...")
+    Base.metadata.create_all(bind=engine)
+
+    # Add sample data
+    db = SessionLocal()
+    try:
+        create_sample_data(db)
+        print("Sample data created successfully!")
+    finally:
+        db.close()

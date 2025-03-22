@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { Agent } from '@/lib/data';
@@ -87,17 +88,39 @@ export const useWorkflowExecution = (nodes: Node[], edges: Edge[], allAgents: Ag
       return updated;
     });
     
-    // Simulate processing delay (5 seconds)
+    // Simulate processing delay (5 seconds) - this would be replaced with actual API call
     setTimeout(() => {
-      // Update results with output (same as input for now)
+      // Update results with output from the API
       setResults(prev => {
         const updated = [...prev];
         updated[currentAgentIndex].status = 'completed';
-        updated[currentAgentIndex].output = inputText;
+        
+        // Simulate different outputs based on the agent type
+        const currentNodeData = executionSequence[currentAgentIndex]?.data;
+        const currentAgentData = currentNodeData?.agent as Agent | undefined;
+        
+        if (currentAgentData) {
+          switch(currentAgentData.id) {
+            case 'text-generator':
+              updated[currentAgentIndex].output = `Generated text based on your input: "${inputText}"\n\nHere's a creative expansion: ${inputText} is just the beginning of what we can explore together. Let me help you develop this further with some additional ideas and perspectives.`;
+              break;
+            case 'code-assistant':
+              updated[currentAgentIndex].output = `Here's some code based on your request:\n\n\`\`\`javascript\n// Implementation for: ${inputText}\nfunction processInput(data) {\n  // Parse the input\n  const parsed = JSON.parse(data);\n  \n  // Process the data\n  const result = parsed.map(item => item.value * 2);\n  \n  return result;\n}\n\`\`\``;
+              break;
+            case 'data-analyzer':
+              updated[currentAgentIndex].output = `Analysis of your input:\n\n• Key themes identified: ${inputText.split(' ').slice(0, 3).join(', ')}\n• Sentiment: Positive\n• Recommendations: Consider exploring related topics such as X, Y, and Z.`;
+              break;
+            default:
+              updated[currentAgentIndex].output = `Processed your input: "${inputText}"\n\nHere's my response based on my capabilities. I've analyzed the content and prepared relevant information that addresses your needs.`;
+          }
+        } else {
+          updated[currentAgentIndex].output = `Processed: ${inputText}`;
+        }
+        
         return updated;
       });
       
-      // Show results after each step
+      // Show results after processing
       setShowResults(true);
     }, 5000);
   }, [currentAgentIndex, executionSequence]);

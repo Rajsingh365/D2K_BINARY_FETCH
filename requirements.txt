@@ -1,0 +1,14 @@
+fastapi
+httpx
+requests
+uvicorn
+python-multipart
+pydantic==2.3.0
+sqlalchemy==2.0.20
+chromadb==0.4.13
+langchain==0.0.311
+google-generativeai>=0.3.0
+tiktoken==0.4.0
+python-dotenv==1.0.0
+jsonschema==4.19.0
+setuptools>=42.0.0

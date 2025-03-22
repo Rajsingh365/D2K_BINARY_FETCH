@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -24,7 +23,6 @@ import AgentNode from '@/components/workflow/AgentNode';
 import AgentPanel from '@/components/workflow/AgentPanel';
 import AgentInputModal from '@/components/workflow/AgentInputModal';
 import WorkflowResults from '@/components/workflow/WorkflowResults';
-import StepResultsView from '@/components/workflow/StepResultsView';
 import { useWorkflowExecution } from '@/hooks/useWorkflowExecution';
 import { agents, Agent } from '@/lib/data';
 import { templates } from '@/lib/templateData';
@@ -82,7 +80,7 @@ const WorkflowEditor = () => {
   // Watch for changes in current agent and show input modal
   useEffect(() => {
     const agent = currentAgent();
-    if (agent && !showResults) {
+    if (agent) {
       setActiveAgent(agent);
       setShowInputModal(true);
     } else {
@@ -90,7 +88,6 @@ const WorkflowEditor = () => {
     }
   }, [currentAgent, showResults]);
 
-  // Load template function
   const loadTemplate = (templateId: string) => {
     const template = templates.find(t => t.id === templateId);
     
@@ -226,11 +223,27 @@ const WorkflowEditor = () => {
   const handleAgentInputSubmit = (inputText: string, files: File[]) => {
     setProcessingInput(true);
     console.log('Submitting input:', inputText, files);
+    
+    // Create FormData to send to the backend
+    const formData = new FormData();
+    formData.append('content', inputText);
+    formData.append('variables', JSON.stringify({})); // Add any variables if needed
+    formData.append('context', JSON.stringify({})); // Add any context if needed
+    
+    // Append files if any
+    files.forEach(file => {
+      formData.append('file', file);
+    });
+    
+    // For now we'll use the mock processing with a delay
     processAgentInput(inputText, files);
-    setProcessingInput(false);
+    
+    setTimeout(() => {
+      setProcessingInput(false);
+    }, 5000);
   };
 
-  // Get the current result for the StepResultsView
+  // Get the current result for the modal
   const getCurrentResult = () => {
     if (currentAgentIndex < 0 || currentAgentIndex >= results.length) {
       return { input: '', output: '' };
@@ -311,21 +324,6 @@ const WorkflowEditor = () => {
           </div>
         </div>
 
-        {/* Show step results view when results should be displayed */}
-        {isRunning && showResults && (
-          <div className="mb-6">
-            <StepResultsView
-              agent={activeAgent}
-              result={getCurrentResult()}
-              onContinue={continueWorkflow}
-              onModify={modifyCurrentStep}
-              onGoBack={goBackOneStep}
-              isFirstStep={currentAgentIndex === 0}
-              isLastStep={currentAgentIndex === executionSequence.length - 1}
-            />
-          </div>
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-[calc(100vh-240px)]">
           <div className="md:col-span-1 bg-background rounded-xl overflow-hidden shadow-sm border">
             <div className="p-4 border-b bg-muted/30">
@@ -376,7 +374,7 @@ const WorkflowEditor = () => {
             </div>
             
             {/* Results section */}
-            {results.length > 0 && !showResults && (
+            {results.length > 0 && !showResults && !showInputModal && (
               <div className="border rounded-xl bg-background p-4 shadow-sm overflow-auto" style={{ maxHeight: '35vh' }}>
                 <WorkflowResults results={results} agents={agents} />
               </div>
@@ -385,7 +383,7 @@ const WorkflowEditor = () => {
         </div>
       </div>
 
-      {/* Agent Input Modal */}
+      {/* Enhanced Agent Input Modal with chatbot interface */}
       {activeAgent && (
         <AgentInputModal
           agent={activeAgent}
@@ -397,6 +395,13 @@ const WorkflowEditor = () => {
           }}
           onSubmit={handleAgentInputSubmit}
           isProcessing={processingInput}
+          result={showResults ? getCurrentResult() : undefined}
+          onContinue={continueWorkflow}
+          onModify={modifyCurrentStep}
+          onGoBack={goBackOneStep}
+          isFirstStep={currentAgentIndex === 0}
+          isLastStep={currentAgentIndex === executionSequence.length - 1}
+          showResults={showResults}
         />
       )}
     </main>

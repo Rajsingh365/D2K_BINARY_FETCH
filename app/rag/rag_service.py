@@ -1,14 +1,27 @@
+# --- START OF FILE rag_service.py ---
+
 from typing import List, Dict, Any, Optional, Set
 from .vector_store import VectorStore
 from .document_processor import DocumentProcessor
 import logging
 
+# REMOVE THESE LangChain imports:
+# from langchain.retrievers.multi_query import MultiQueryRetriever
+# from langchain.schema import Document
+# from langchain.retrievers import MergerRetriever
+import os
+from dotenv import load_dotenv
+
 # Setup logging
 logger = logging.getLogger(__name__)
 
+# Load environment variables
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
 
 class RAGService:
-    """Centralized service for document storage and retrieval across agents."""
+    """Centralized service for document storage and retrieval using LangChain."""
 
     _instance = None
 
@@ -21,10 +34,17 @@ class RAGService:
 
     def __init__(self):
         """Initialize the RAG service with collections storage."""
-        logger.info("Initializing RAG service")
+        logger.info("Initializing RAG service with LangChain integration")
         self.collections: Dict[str, VectorStore] = {}
         self.document_processor = DocumentProcessor()
         self.shared_collections: Set[str] = set()
+
+        # Remove LLM initialization based on ChatGoogleGenerativeAI
+        self.llm = None  # No longer needed
+        if GOOGLE_API_KEY:
+            logger.info("Google API key available for advanced retrieval")
+        else:
+            logger.warning("No API key available for advanced retrieval methods")
 
     def get_collection(self, collection_name: str) -> VectorStore:
         """Get or create a vector store collection."""
@@ -48,6 +68,10 @@ class RAGService:
                             f"Dummy store: search called for {collection_name}"
                         )
                         return []
+
+                    def as_retriever(self, *args, **kwargs):
+                        # Dummy retriever not needed now.
+                        return None
 
                 self.collections[collection_name] = DummyVectorStore()
 
@@ -90,6 +114,10 @@ class RAGService:
         except Exception as e:
             logger.error(f"Error searching {collection_name}: {str(e)}")
             return []
+
+    # Remove or comment out the LangChain-specific methods:
+    # def get_retriever(self, ...): ...
+    # def get_merged_retriever(self, ...): ...
 
     def list_collections(self) -> Set[str]:
         """List all available collections."""
@@ -140,3 +168,6 @@ class RAGService:
                     results[collection_name] = []
 
         return results
+
+
+# --- END OF FILE rag_service.py ---

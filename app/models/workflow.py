@@ -22,6 +22,7 @@ class WorkflowAgentInDB(WorkflowAgentBase):
 
     class Config:
         from_attributes = True  # Updated from orm_mode = True
+        arbitrary_types_allowed = True
 
 
 class WorkflowBase(BaseModel):
@@ -49,3 +50,4 @@ class Workflow(WorkflowBase):
 
     class Config:
         from_attributes = True  # Updated from orm_mode = True
+        arbitrary_types_allowed = True

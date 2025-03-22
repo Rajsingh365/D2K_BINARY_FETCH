@@ -11,89 +11,23 @@ import {
   Trash2,
   Filter,
   List,
-  ArrowUpDown
+  ArrowUpDown,
+  Heart,
+  Send
 } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-// Dummy data for workflows
-const myWorkflows = [
-  {
-    id: 'wf-001',
-    name: 'Content Marketing Pipeline',
-    description: 'Generates blog posts and distributes them across channels',
-    status: 'Active',
-    lastRun: '2 hours ago',
-    category: 'Marketing',
-    agents: 5,
-    thumbnail: 'linear-gradient(to right, #4ade80, #22d3ee)',
-    favorite: true
-  },
-  {
-    id: 'wf-002',
-    name: 'Customer Support Assistant',
-    description: 'Analyzes customer inquiries and suggests responses',
-    status: 'Paused',
-    lastRun: '2 days ago',
-    category: 'Support',
-    agents: 3,
-    thumbnail: 'linear-gradient(to right, #a78bfa, #f472b6)',
-    favorite: false
-  },
-  {
-    id: 'wf-003',
-    name: 'Daily Team Updates',
-    description: 'Collects team activity and sends daily summaries',
-    status: 'Active',
-    lastRun: '1 day ago',
-    category: 'Productivity',
-    agents: 2,
-    thumbnail: 'linear-gradient(to right, #fb923c, #f87171)',
-    favorite: true
-  },
-  {
-    id: 'wf-004',
-    name: 'Competitive Analysis',
-    description: 'Monitors competitors and provides weekly reports',
-    status: 'Draft',
-    lastRun: 'Never run',
-    category: 'Marketing',
-    agents: 4,
-    thumbnail: 'linear-gradient(to right, #38bdf8, #818cf8)',
-    favorite: false
-  },
-  {
-    id: 'wf-005',
-    name: 'Contract Review Pipeline',
-    description: 'Analyzes legal documents and flags potential issues',
-    status: 'Active',
-    lastRun: '5 hours ago',
-    category: 'Legal',
-    agents: 3,
-    thumbnail: 'linear-gradient(to right, #facc15, #fb923c)',
-    favorite: false
-  },
-  {
-    id: 'wf-006',
-    name: 'Social Media Content Generator',
-    description: 'Creates and schedules posts for multiple platforms',
-    status: 'Active',
-    lastRun: '3 hours ago',
-    category: 'Marketing',
-    agents: 4,
-    thumbnail: 'linear-gradient(to right, #c084fc, #e879f9)',
-    favorite: true
-  }
-];
+import { toast } from 'sonner';
+import { useWorkflows, Workflow } from '@/context/WorkflowContext';
+import InputModal from '@/components/workflow/InputModal';
 
 // Component for displaying a workflow card
-const WorkflowCard = ({ workflow }: { workflow: typeof myWorkflows[0] }) => {
+const WorkflowCard = ({ workflow }: { workflow: Workflow }) => {
   const navigate = useNavigate();
+  const { toggleFavorite, deleteWorkflow, updateWorkflow } = useWorkflows();
   
   const statusColors = {
     Active: 'bg-green-100 text-green-800',
@@ -101,12 +35,52 @@ const WorkflowCard = ({ workflow }: { workflow: typeof myWorkflows[0] }) => {
     Draft: 'bg-blue-100 text-blue-800'
   };
 
+  const handleDuplicate = () => {
+    const newWorkflow = {
+      ...workflow,
+      id: `wf-${Date.now()}`,
+      name: `${workflow.name} (Copy)`,
+      lastRun: 'Never run'
+    };
+    
+    updateWorkflow(newWorkflow);
+    toast.success(`Duplicated workflow "${workflow.name}"`);
+  };
+
+  const handleDelete = () => {
+    deleteWorkflow(workflow.id);
+    toast.success(`Deleted workflow "${workflow.name}"`);
+  };
+
+  const handleFavoriteToggle = () => {
+    toggleFavorite(workflow.id);
+    toast.success(workflow.favorite 
+      ? `Removed "${workflow.name}" from favorites` 
+      : `Added "${workflow.name}" to favorites`);
+  };
+
+  const handleRunWorkflow = () => {
+    // Navigate to the workflow editor and trigger the run
+    navigate(`/workflow-editor?id=${workflow.id}&run=true`);
+  };
+
   return (
     <Card className="workflow-card h-full flex flex-col overflow-hidden border hover:shadow-md transition-shadow">
       <div 
-        className="h-28 flex items-center justify-center" 
+        className="h-28 flex items-center justify-center relative" 
         style={{ background: workflow.thumbnail }}
       >
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute top-2 right-2 bg-white/80 hover:bg-white" 
+          onClick={handleFavoriteToggle}
+        >
+          <Heart 
+            size={16} 
+            className={workflow.favorite ? "fill-red-500 text-red-500" : "text-gray-500"} 
+          />
+        </Button>
         <div className="flex flex-col gap-1 items-center justify-center text-white p-4">
           <span className="text-sm font-medium">{workflow.agents} Agents</span>
           <span className="text-xs opacity-80">{workflow.category}</span>
@@ -149,18 +123,18 @@ const WorkflowCard = ({ workflow }: { workflow: typeof myWorkflows[0] }) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white">
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer" onClick={handleDuplicate}>
                 <Copy size={14} className="mr-2" />
                 Duplicate
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer text-red-600">
+              <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleDelete}>
                 <Trash2 size={14} className="mr-2" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button size="sm">
+          <Button size="sm" onClick={handleRunWorkflow}>
             <Play size={14} className="mr-1" />
             Run
           </Button>
@@ -173,10 +147,62 @@ const WorkflowCard = ({ workflow }: { workflow: typeof myWorkflows[0] }) => {
 const MyWorkflows = () => {
   const [viewType, setViewType] = useState('all');
   const navigate = useNavigate();
+  const { workflows } = useWorkflows();
+  const [showInputModal, setShowInputModal] = useState(false);
+  const [processingInput, setProcessingInput] = useState(false);
   
   const filteredWorkflows = viewType === 'favorites' 
-    ? myWorkflows.filter(wf => wf.favorite)
-    : myWorkflows;
+    ? workflows.filter(wf => wf.favorite)
+    : workflows;
+  
+  const handleNewWorkflow = () => {
+    setShowInputModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowInputModal(false);
+  };
+
+  const handleCreateWorkflow = (formData: FormData) => {
+    setProcessingInput(true);
+    
+    // Extract name from input text or use default
+    const inputText = formData.get('content') as string;
+    const workflowName = inputText.trim() || 'New Workflow';
+    
+    // Create new workflow object
+    const newWorkflow: Workflow = {
+      id: `wf-${Date.now()}`,
+      name: workflowName,
+      description: 'A new workflow',
+      status: 'Draft',
+      lastRun: 'Never run',
+      category: 'Custom',
+      agents: 0,
+      thumbnail: `linear-gradient(to right, ${getRandomColor()}, ${getRandomColor()})`,
+      favorite: false,
+      nodes: [],
+      edges: []
+    };
+    
+    // Navigate to workflow editor with the new workflow ID
+    navigate(`/workflow-editor?id=${newWorkflow.id}`);
+    
+    setTimeout(() => {
+      setProcessingInput(false);
+      setShowInputModal(false);
+    }, 1000);
+  };
+  
+  // Helper function to generate random colors for workflow thumbnails
+  const getRandomColor = () => {
+    const colors = [
+      '#4ade80', '#22d3ee', '#a78bfa', '#f472b6', 
+      '#fb923c', '#f87171', '#38bdf8', '#818cf8',
+      '#facc15', '#c084fc', '#e879f9'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
   
   return (
       <main className="flex-grow pt-20">
@@ -190,7 +216,7 @@ const MyWorkflows = () => {
             </div>
             <Button 
               size="lg" 
-              onClick={() => navigate('/workflow-editor')}
+              onClick={handleNewWorkflow}
               className="whitespace-nowrap"
             >
               <Plus size={16} className="mr-2" />
@@ -249,6 +275,14 @@ const MyWorkflows = () => {
                   ) : (
                     <div className="text-center py-12">
                       <p className="text-muted-foreground">No workflows found</p>
+                      <Button 
+                        variant="outline" 
+                        onClick={handleNewWorkflow}
+                        className="mt-4"
+                      >
+                        <Plus size={16} className="mr-2" />
+                        Create Your First Workflow
+                      </Button>
                     </div>
                   )}
                 </TabsContent>
@@ -263,6 +297,7 @@ const MyWorkflows = () => {
                   ) : (
                     <div className="text-center py-12">
                       <p className="text-muted-foreground">No favorite workflows found</p>
+                      <p className="text-sm mt-2">Mark workflows as favorites by clicking the heart icon</p>
                     </div>
                   )}
                 </TabsContent>
@@ -310,6 +345,16 @@ const MyWorkflows = () => {
             </div>
           </div>
         </div>
+
+        {/* Input Modal for creating new workflow */}
+        <InputModal
+          isOpen={showInputModal}
+          onClose={handleModalClose}
+          onSubmit={handleCreateWorkflow}
+          isProcessing={processingInput}
+          title="Create New Workflow"
+          description="Give your workflow a name or just click Submit to create a new workflow."
+        />
       </main>
   );
 };

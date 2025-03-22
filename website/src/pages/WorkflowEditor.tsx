@@ -1,5 +1,6 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
   ReactFlow,
   MiniMap,
@@ -28,23 +29,25 @@ import { agents, Agent } from '@/lib/data';
 import { templates } from '@/lib/templateData';
 import { Button } from '@/components/ui/button';
 import { Save, Share2, Play, ArrowLeft, Trash2, Zap, StopCircle } from 'lucide-react';
+import { useWorkflows, Workflow } from '@/context/WorkflowContext';
 
 // Define custom node types
 const nodeTypes = {
   agentNode: AgentNode,
 };
 
-const initialNodes: Node[] = [];
-const initialEdges: Edge[] = [];
-
 const WorkflowEditor = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [workflowName, setWorkflowName] = useState('New Workflow');
+  const [workflowDescription, setWorkflowDescription] = useState('');
+  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { workflows, addWorkflow, updateWorkflow, getWorkflow } = useWorkflows();
 
   // Workflow execution state
   const {
@@ -67,6 +70,50 @@ const WorkflowEditor = () => {
   const [processingInput, setProcessingInput] = useState(false);
   const [activeAgent, setActiveAgent] = useState<Agent | null>(null);
 
+  // Load workflow from ID in URL params
+  useEffect(() => {
+    const workflowId = searchParams.get('id');
+    const shouldRun = searchParams.get('run') === 'true';
+    
+    if (workflowId) {
+      const workflow = getWorkflow(workflowId);
+      
+      if (workflow) {
+        // Load workflow data
+        setCurrentWorkflowId(workflowId);
+        setWorkflowName(workflow.name);
+        setWorkflowDescription(workflow.description || '');
+        setNodes(workflow.nodes || []);
+        setEdges(workflow.edges || []);
+        
+        // If the run parameter is present, start the workflow after a short delay
+        if (shouldRun && workflow.nodes.length > 0) {
+          setTimeout(() => {
+            startWorkflow();
+          }, 500);
+        }
+      } else {
+        // Create a new workflow with this ID if it doesn't exist
+        const newWorkflow: Workflow = {
+          id: workflowId,
+          name: workflowName,
+          description: workflowDescription || 'A custom workflow',
+          status: 'Draft',
+          lastRun: 'Never run',
+          category: 'Custom',
+          agents: 0,
+          thumbnail: `linear-gradient(to right, #4ade80, #22d3ee)`,
+          favorite: false,
+          nodes: [],
+          edges: []
+        };
+        
+        addWorkflow(newWorkflow);
+        setCurrentWorkflowId(workflowId);
+      }
+    }
+  }, [searchParams, getWorkflow, addWorkflow]);
+  
   // Parse query parameters for template
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -187,21 +234,58 @@ const WorkflowEditor = () => {
   );
 
   const handleSaveWorkflow = () => {
-    const flow = {
+    if (!currentWorkflowId) {
+      // Generate a new ID if one doesn't exist
+      setCurrentWorkflowId(`wf-${Date.now()}`);
+    }
+    
+    const workflowId = currentWorkflowId || `wf-${Date.now()}`;
+    
+    // Update or create workflow in context
+    const workflow: Workflow = {
+      id: workflowId,
       name: workflowName,
+      description: workflowDescription || 'A custom workflow',
+      status: nodes.length > 0 ? 'Active' : 'Draft',
+      lastRun: new Date().toLocaleString(),
+      category: 'Custom',
+      agents: nodes.length,
+      thumbnail: `linear-gradient(to right, #4ade80, #22d3ee)`,
+      favorite: getWorkflow(workflowId)?.favorite || false,
       nodes,
-      edges,
+      edges
     };
     
-    console.log('Saving workflow:', flow);
-    localStorage.setItem('savedWorkflow', JSON.stringify(flow));
+    if (getWorkflow(workflowId)) {
+      updateWorkflow(workflow);
+    } else {
+      addWorkflow(workflow);
+      setCurrentWorkflowId(workflowId);
+    }
+    
     toast.success('Workflow saved successfully!');
+    
+    // Update URL to include workflow ID if not already there
+    if (!searchParams.get('id')) {
+      navigate(`/workflow-editor?id=${workflowId}`, { replace: true });
+    }
   };
 
   const handleRunWorkflow = () => {
     if (nodes.length === 0) {
       toast.error('Your workflow is empty. Add some agents first!');
       return;
+    }
+    
+    // Update last run time before starting
+    if (currentWorkflowId) {
+      const workflow = getWorkflow(currentWorkflowId);
+      if (workflow) {
+        updateWorkflow({
+          ...workflow,
+          lastRun: new Date().toLocaleString()
+        });
+      }
     }
     
     startWorkflow();
@@ -242,15 +326,6 @@ const WorkflowEditor = () => {
     // Process the input using the workflow execution
     processAgentInput(inputText, files);
     
-    // In a real implementation, you'd send the formData to your backend API
-    // Example:
-    // const response = await fetch('/api/workflow/process', {
-    //   method: 'POST',
-    //   body: formData,
-    // });
-    // const result = await response.json();
-    // processResult(result);
-    
     setTimeout(() => {
       setProcessingInput(false);
     }, 3000);
@@ -264,11 +339,11 @@ const WorkflowEditor = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2"
-            onClick={() => navigate('/templates')}
+            onClick={() => navigate('/my-workflows')}
             disabled={isRunning}
           >
             <ArrowLeft size={16} className="mr-1" />
-            Back to Templates
+            Back to Workflows
           </Button>
           <input
             type="text"
@@ -385,7 +460,7 @@ const WorkflowEditor = () => {
         </div>
       </div>
 
-      {/* Simple Input Modal */}
+      {/* Input Modal */}
       <InputModal
         isOpen={showInputModal}
         onClose={() => {
@@ -395,8 +470,8 @@ const WorkflowEditor = () => {
         }}
         onSubmit={handleFormSubmit}
         isProcessing={processingInput}
-        title="Workflow Input"
-        description="Provide information for this workflow to process."
+        title={activeAgent ? `Input for ${activeAgent.name}` : "Workflow Input"}
+        description={activeAgent ? activeAgent.description : "Provide information for this workflow to process."}
       />
     </main>
   );

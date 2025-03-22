@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MarketplaceItem } from "@/lib/marketPlaceData";
 import Transition from "@/components/animations/Transition";
+import {loadStripe} from '@stripe/stripe-js';
 
 const PaymentCheckout = () => {
   const { cartAgent, setCartAgent, setUsersAgent, usersAgent } = useAuthUser();
@@ -45,14 +46,34 @@ const PaymentCheckout = () => {
   // Handle the checkout process
   const handleCheckout = () => {
     // Add cart items to user's agents
-    setUsersAgent([...usersAgent, ...cartAgent]);
-    // Clear the cart
-    setCartAgent([]);
+   
     // Show success notification or redirect
     alert("Purchase successful! Agents have been added to your account.");
     navigate("/marketplace");
   };
 
+  const makePayment = async () => {
+    const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+    const response = await fetch(`${import.meta.env.VITE_NODE_BACKEND_URL}/api/payment/create-checkout-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ products: cartAgent }),
+    });
+  
+    const session = await response.json();
+  
+    
+    const result = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+
+    if (result.error) {
+      console.error(result.error);
+    }
+  };
+  
   return (
     <main className="flex-grow pt-24 pb-16">
       <div className="container mx-auto px-4">
@@ -219,7 +240,7 @@ const PaymentCheckout = () => {
                   <CardFooter>
                     <Button
                       className="w-full py-6 text-base"
-                      onClick={handleCheckout}
+                      onClick={makePayment}
                     >
                       <CreditCard className="h-5 w-5 mr-2" />
                       Complete Purchase

@@ -1,0 +1,354 @@
+[
+    {
+        "id": 1,
+        "name": "SEO Optimizer",
+        "title": "SEO Optimizer Pro",
+        "description": "Analyzes and enhances content to maximize search engine visibility and ranking.",
+        "category": "marketing",
+        "type": "Content Enhancement",
+        "features": [
+            "Keyword optimization",
+            "SEO score analysis",
+            "Competitor content insights",
+            "Readability improvements"
+        ],
+        "icon": "Search",
+        "color": "blue",
+        "price": 49.99,
+        "rating": 4.7,
+        "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+        "featured": true,
+        "tags": ["SEO", "Marketing", "Optimization"],
+        "seller": {
+            "name": "AI Solutions Inc",
+            "rating": 4.8,
+            "verified": true
+        },
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "content"
+            ]
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "keyword_analysis": {
+                    "type": "object"
+                },
+                "recommendations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "seo_score": {
+                    "type": "number"
+                }
+            }
+        },
+        "config_schema": {
+            "type": "object",
+            "properties": {
+                "collection_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "implementation_path": "app.agents.seo_optimizer.SEOOptimizer"
+    },
+    {
+        "id": 2,
+        "name": "Meeting Summarizer",
+        "title": "AI Meeting Assistant",
+        "description": "Converts lengthy meetings into concise, actionable summaries with key points and follow-ups.",
+        "category": "productivity",
+        "type": "Summarization",
+        "features": [
+            "Automated meeting notes",
+            "Action item extraction",
+            "Decision highlighting",
+            "Searchable transcripts"
+        ],
+        "icon": "FileText",
+        "color": "indigo",
+        "price": 39.99,
+        "rating": 4.6,
+        "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+        "featured": false,
+        "tags": ["Meetings", "Transcription", "Notes"],
+        "seller": {
+            "name": "Productivity Tools Co",
+            "rating": 4.4,
+            "verified": true
+        },
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "transcript": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "transcript"
+            ]
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "summary": {
+                    "type": "string"
+                },
+                "action_items": {
+                    "type": "array"
+                },
+                "participants": {
+                    "type": "array"
+                },
+                "duration_minutes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "config_schema": {
+            "type": "object",
+            "properties": {
+                "summary_length": {
+                    "type": "string",
+                    "enum": [
+                        "short",
+                        "medium",
+                        "long"
+                    ]
+                },
+                "extract_actions": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "implementation_path": "app.agents.meeting_summarizer.MeetingSummarizer"
+    },
+    {
+        "id": 3,
+        "name": "Smart Email Manager",
+        "title": "Smart Email Manager AI",
+        "description": "Categorizes, prioritizes, and drafts responses to emails.",
+        "category": "productivity",
+        "type": "Automation",
+        "features": [
+            "Email categorization",
+            "Priority sorting",
+            "AI-generated responses",
+            "Spam filtering"
+        ],
+        "icon": "Scroll",
+        "color": "blue",
+        "price": 59.99,
+        "rating": 4.5,
+        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475",
+        "featured": true,
+        "tags": ["Email", "Automation", "Inbox Management"],
+        "seller": {
+            "name": "Inbox Solutions Inc",
+            "rating": 4.6,
+            "verified": true
+        },
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "email"
+            ]
+        },
+        "output_schema": {
+            "type": "object"
+        },
+        "config_schema": {
+            "type": "object",
+            "properties": {
+                "mode": {
+                    "type": "string",
+                    "enum": [
+                        "categorize",
+                        "prioritize",
+                        "draft_response"
+                    ]
+                },
+                "response_tone": {
+                    "type": "string",
+                    "enum": [
+                        "professional",
+                        "friendly",
+                        "concise"
+                    ]
+                }
+            }
+        },
+        "implementation_path": "app.agents.smart_email_manager.SmartEmailManager"
+    },
+    {
+        "id": 4,
+        "name": "Grammar and Style Checker",
+        "title": "Pro Grammar Assistant",
+        "description": "Checks and corrects grammar/style errors",
+        "category": "content",
+        "type": "Text Enhancement",
+        "features": [
+            "Grammar correction",
+            "Style suggestions",
+            "Readability analysis",
+            "Tone adjustment"
+        ],
+        "icon": "Edit",
+        "color": "green",
+        "price": 29.99,
+        "rating": 4.4,
+        "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a",
+        "featured": false,
+        "tags": ["Writing", "Grammar", "Editing"],
+        "seller": {
+            "name": "Writing Tools Ltd",
+            "rating": 4.3,
+            "verified": true
+        },
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "content"
+            ]
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "corrected_text": {
+                    "type": "string"
+                },
+                "grammar_issues": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "config_schema": {},
+        "implementation_path": "app.agents.grammar_and_style_checker.GrammarAndStyleChecker"
+    },
+    {
+        "id": 5,
+        "name": "Zoom Meeting Scheduler",
+        "title": "Smart Meeting Scheduler",
+        "description": "Schedules zoom meetings based on provided information",
+        "category": "productivity",
+        "type": "Scheduling",
+        "features": [
+            "Automated scheduling",
+            "Calendar integration",
+            "Meeting configuration",
+            "Participant management"
+        ],
+        "icon": "Calendar",
+        "color": "purple",
+        "price": 34.99,
+        "rating": 4.3,
+        "image": "https://images.unsplash.com/photo-1505373877841-8d25f7d46678",
+        "featured": false,
+        "tags": ["Meetings", "Scheduling", "Zoom"],
+        "seller": {
+            "name": "Meeting Solutions Pro",
+            "rating": 4.2,
+            "verified": true
+        },
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "meeting_title": {
+                    "type": "string",
+                    "description": "Title of the meeting"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of email addresses of participants"
+                },
+                "start_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Start time of the meeting in ISO format"
+                },
+                "duration": {
+                    "type": "integer",
+                    "description": "Duration of meeting in minutes"
+                },
+                "agenda": {
+                    "type": "string",
+                    "description": "Meeting agenda/description"
+                }
+            },
+            "required": ["meeting_title", "participants", "start_time", "duration"]
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "meeting_id": {
+                    "type": "string",
+                    "description": "ID of the scheduled meeting"
+                },
+                "join_url": {
+                    "type": "string",
+                    "description": "URL for participants to join the meeting"
+                },
+                "start_url": {
+                    "type": "string",
+                    "description": "URL for the host to start the meeting"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Status of the meeting creation"
+                }
+            }
+        },
+        "config_schema": {
+            "type": "object",
+            "properties": {
+                "use_pmi": {
+                    "type": "boolean",
+                    "description": "Whether to use Personal Meeting ID",
+                    "default": "False"
+                },
+                "auto_recording": {
+                    "type": "string",
+                    "enum": ["none", "local", "cloud"],
+                    "default": "none",
+                    "description": "Automatic recording option"
+                },
+                "mute_upon_entry": {
+                    "type": "boolean",
+                    "default": "True",
+                    "description": "Whether to mute participants upon entry"
+                }
+            }
+        },
+        "implementation_path": "app.agents.zoom_meeting_scheduler.ZoomMeetingScheduler"
+    }
+]

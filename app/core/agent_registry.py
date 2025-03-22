@@ -1,8 +1,12 @@
+# --- app/core/agent_registry.py ---
 import importlib
-from typing import Dict, Type, List, Any
+from typing import Dict, Optional, Type, List, Any
+
+# from sqlalchemy.orm import Session  # Removed
+
 from app.agents.base import BaseAgent
-from app.db.models import Agent as AgentModel
-from sqlalchemy.orm import Session
+
+# from app.db.models import Agent as AgentModel # Removed
 
 
 class AgentRegistry:
@@ -25,44 +29,44 @@ class AgentRegistry:
 
     @staticmethod
     def get_agent_instance(
-        agent_model: AgentModel, config: Dict[str, Any] = None
-    ) -> BaseAgent:
+        agent_model: Dict, config: Dict[str, Any] = None
+    ) -> BaseAgent:  # Changed type
         """
         Get an instance of an agent from database model.
 
         Args:
-            agent_model: Database model of the agent
+            agent_model: Database model of the agent (now a dictionary)
             config: Optional configuration for the agent
 
         Returns:
             Initialized agent instance
         """
-        agent_class = AgentRegistry.get_agent_class(agent_model.implementation_path)
+        agent_class = AgentRegistry.get_agent_class(agent_model["implementation_path"])
         return agent_class(**(config or {}))
 
     @staticmethod
-    def list_available_agents(db: Session) -> List[AgentModel]:
+    def list_available_agents(dummy_db) -> List[Dict]:  # Changed return type
         """
         List all available agents in the system.
 
         Args:
-            db: Database session
+            dummy_db: Dummy database
 
         Returns:
-            List of agent models
+            List of agent models (dictionaries)
         """
-        return db.query(AgentModel).all()
+        return list(dummy_db["agents"].values())
 
     @staticmethod
-    def get_agent_by_id(db: Session, agent_id: int) -> AgentModel:
+    def get_agent_by_id(dummy_db, agent_id: int) -> Optional[Dict]:  # Changed return
         """
         Get agent model by ID.
 
         Args:
-            db: Database session
+            dummy_db: Dummy database.
             agent_id: ID of the agent
 
         Returns:
-            Agent model or None if not found
+            Agent model (dictionary) or None if not found
         """
-        return db.query(AgentModel).filter(AgentModel.id == agent_id).first()
+        return dummy_db["agents"].get(agent_id)

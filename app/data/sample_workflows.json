@@ -1,0 +1,70 @@
+[
+    {
+        "id": 1,
+        "name": "Marketing Content Optimizer",
+        "description": "Optimize marketing content for SEO and engagement",
+        "category": "marketing",
+        "is_template": true,
+        "agents": [
+            {
+                "agent_id": 1,
+                "order": 1,
+                "config": {},
+                "id": 1,
+                "workflow_id": 1
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Meeting Productivity Suite",
+        "description": "Summarize meetings and manage follow-up emails",
+        "category": "productivity",
+        "is_template": true,
+        "agents": [
+            {
+                "agent_id": 2,
+                "order": 1,
+                "config": {},
+                "id": 2,
+                "workflow_id": 2
+            },
+            {
+                "agent_id": 3,
+                "order": 2,
+                "config": {},
+                "id": 3,
+                "workflow_id": 2
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "name": "Meeting Management Suite",
+        "description": "Schedule, prepare, and follow up on meetings efficiently",
+        "category": "productivity",
+        "is_template": true,
+        "agents": [
+            {
+                "agent_id": 5,
+                "order": 1,
+                "config": {
+                    "mute_upon_entry": true,
+                    "auto_recording": "cloud"
+                },
+                "id": 5,
+                "workflow_id": 3
+            },
+            {
+                "agent_id": 2,
+                "order": 2,
+                "config": {
+                    "summary_length": "medium",
+                    "extract_actions": true
+                },
+                "id": 2,
+                "workflow_id": 3
+            }
+        ]
+    }
+]

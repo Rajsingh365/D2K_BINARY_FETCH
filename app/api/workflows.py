@@ -1,53 +1,42 @@
+# --- app/api/workflows.py ---
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 
-from app.db.database import get_db
-from app.db.models import Workflow, WorkflowAgent, Agent
+# from sqlalchemy.orm import Session # Removed
+# from app.db.database import get_db # Removed
+# from app.db.models import Workflow, WorkflowAgent, Agent # Removed
 from app.models.workflow import (
     WorkflowCreate,
     Workflow as WorkflowSchema,
     WorkflowUpdate,
+)  # Keep
+
+from app.core.sample_data import (
+    load_sample_agents,
+    load_sample_workflows,
+    add_workflow,
+    update_workflow_data,
+    delete_workflow_data,
 )
 
 router = APIRouter()
 
+# Use dummy data stores (dictionaries)
+dummy_agents = load_sample_agents()
+dummy_workflows = load_sample_workflows()
+
+
+# Dependency to get the dummy data stores
+def get_dummy_data():
+    return {"agents": dummy_agents, "workflows": dummy_workflows}
+
 
 @router.post("/workflows/", response_model=WorkflowSchema)
-def create_workflow(workflow: WorkflowCreate, db: Session = Depends(get_db)):
+def create_workflow(
+    workflow: WorkflowCreate, dummy_data=Depends(get_dummy_data)
+):  # Use dummy DB
     """Create a new workflow with associated agents."""
-    # Create new workflow
-    db_workflow = Workflow(
-        name=workflow.name,
-        description=workflow.description,
-        category=workflow.category,
-        is_template=workflow.is_template,
-    )
-    db.add(db_workflow)
-    db.flush()  # Flush to get the ID
-
-    # Add agents to workflow
-    for agent_data in workflow.agents:
-        # Verify agent exists
-        agent = db.query(Agent).filter(Agent.id == agent_data.agent_id).first()
-        if not agent:
-            db.rollback()
-            raise HTTPException(
-                status_code=404, detail=f"Agent with id {agent_data.agent_id} not found"
-            )
-
-        # Create workflow-agent relationship
-        db_workflow_agent = WorkflowAgent(
-            workflow_id=db_workflow.id,
-            agent_id=agent_data.agent_id,
-            order=agent_data.order,
-            config=agent_data.config,
-        )
-        db.add(db_workflow_agent)
-
-    db.commit()
-    db.refresh(db_workflow)
-    return db_workflow
+    return add_workflow(dummy_data, workflow)  # Delegate to function in sample_data.py
 
 
 @router.get("/workflows/", response_model=List[WorkflowSchema])
@@ -56,90 +45,41 @@ def read_workflows(
     limit: int = 100,
     category: Optional[str] = None,
     is_template: Optional[bool] = None,
-    db: Session = Depends(get_db),
+    dummy_data=Depends(get_dummy_data),
 ):
     """Get all workflows with optional filtering."""
-    query = db.query(Workflow)
+    workflows_list = list(dummy_data["workflows"].values())
 
     if category:
-        query = query.filter(Workflow.category == category)
-
+        workflows_list = [w for w in workflows_list if w["category"] == category]
     if is_template is not None:
-        query = query.filter(Workflow.is_template == is_template)
+        workflows_list = [w for w in workflows_list if w["is_template"] == is_template]
 
-    return query.offset(skip).limit(limit).all()
+    # Convert to WorkflowSchema for response
+    return [WorkflowSchema(**w) for w in workflows_list[skip : skip + limit]]
 
 
 @router.get("/workflows/{workflow_id}", response_model=WorkflowSchema)
-def read_workflow(workflow_id: int, db: Session = Depends(get_db)):
+def read_workflow(workflow_id: int, dummy_data=Depends(get_dummy_data)):
     """Get a specific workflow by ID."""
-    workflow = db.query(Workflow).filter(Workflow.id == workflow_id).first()
+    workflow = dummy_data["workflows"].get(workflow_id)
     if workflow is None:
         raise HTTPException(status_code=404, detail="Workflow not found")
-    return workflow
+
+    return WorkflowSchema(**workflow)
 
 
 @router.put("/workflows/{workflow_id}", response_model=WorkflowSchema)
 def update_workflow(
-    workflow_id: int, workflow_update: WorkflowUpdate, db: Session = Depends(get_db)
+    workflow_id: int,
+    workflow_update: WorkflowUpdate,
+    dummy_data=Depends(get_dummy_data),
 ):
     """Update a workflow and its agents."""
-    # Get existing workflow
-    db_workflow = db.query(Workflow).filter(Workflow.id == workflow_id).first()
-    if db_workflow is None:
-        raise HTTPException(status_code=404, detail="Workflow not found")
-
-    # Update workflow fields
-    if workflow_update.name is not None:
-        db_workflow.name = workflow_update.name
-    if workflow_update.description is not None:
-        db_workflow.description = workflow_update.description
-    if workflow_update.category is not None:
-        db_workflow.category = workflow_update.category
-    if workflow_update.is_template is not None:
-        db_workflow.is_template = workflow_update.is_template
-
-    # Update agents if provided
-    if workflow_update.agents is not None:
-        # Remove existing workflow agents
-        db.query(WorkflowAgent).filter(
-            WorkflowAgent.workflow_id == workflow_id
-        ).delete()
-
-        # Add updated agents
-        for agent_data in workflow_update.agents:
-            # Verify agent exists
-            agent = db.query(Agent).filter(Agent.id == agent_data.agent_id).first()
-            if not agent:
-                db.rollback()
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Agent with id {agent_data.agent_id} not found",
-                )
-
-            # Create workflow-agent relationship
-            db_workflow_agent = WorkflowAgent(
-                workflow_id=db_workflow.id,
-                agent_id=agent_data.agent_id,
-                order=agent_data.order,
-                config=agent_data.config,
-            )
-            db.add(db_workflow_agent)
-
-    db.commit()
-    db.refresh(db_workflow)
-    return db_workflow
+    return update_workflow_data(dummy_data, workflow_id, workflow_update)
 
 
 @router.delete("/workflows/{workflow_id}", response_model=dict)
-def delete_workflow(workflow_id: int, db: Session = Depends(get_db)):
+def delete_workflow(workflow_id: int, dummy_data=Depends(get_dummy_data)):
     """Delete a workflow."""
-    workflow = db.query(Workflow).filter(Workflow.id == workflow_id).first()
-    if workflow is None:
-        raise HTTPException(status_code=404, detail="Workflow not found")
-
-    # Delete workflow (cascade will handle workflow_agents)
-    db.delete(workflow)
-    db.commit()
-
-    return {"message": f"Workflow {workflow_id} deleted successfully"}
+    return delete_workflow_data(dummy_data, workflow_id)

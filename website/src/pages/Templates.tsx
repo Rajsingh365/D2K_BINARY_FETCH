@@ -7,14 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, FileCode, Search } from 'lucide-react';
 import { templates } from '@/lib/templateData';
-import { agents } from '@/lib/data';
+// import { agents } from '@/lib/data';
+import { Agent } from '@/lib/marketPlaceData';
 import Transition from '@/components/animations/Transition';
 
 const Templates = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTemplates, setFilteredTemplates] = useState(templates);
-
+  const [agents, setAgents] = useState<Agent[]>([]);
   // Filter templates based on search query
   useEffect(() => {
     if (searchQuery) {
@@ -36,6 +37,21 @@ const Templates = () => {
     // Navigate to workflow editor with the template ID
     navigate(`/workflow-editor?template=${templateId}`);
   };
+  useEffect(()=> {
+        const fetchAgents = async () => {
+          try{
+          const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents`);
+          const data = await response.json();
+          console.log('data', data);
+          
+          setAgents(data);
+      }
+      catch(err){
+        console.log(err);
+      }
+    }
+      fetchAgents();
+    }, [])
 
   // Helper function to get agent objects from IDs
   const getAgentsForTemplate = (template: typeof templates[0]) => {

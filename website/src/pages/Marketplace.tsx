@@ -29,8 +29,7 @@ import {
   Search,
 } from "lucide-react";
 import {
-  marketplaceItems,
-  MarketplaceItem,
+  Agent,
   categories,
 } from "@/lib/marketPlaceData";
 import { useAuthUser } from "@/context/AuthUserContext";
@@ -41,25 +40,44 @@ const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredItems, setFilteredItems] =
-    useState<MarketplaceItem[]>(marketplaceItems);
+    useState<Agent[]>([]);
+  const [marketPlaceItems, setMarketPlaceItems] = useState<Agent[]>([]);
+
   const [sortOption, setSortOption] = useState<
     "popular" | "newest" | "priceAsc" | "priceDesc"
   >("popular");
   const navigate = useNavigate();
   const { usersAgent, setUsersAgent, cartAgent, setCartAgent } = useAuthUser();
 
+
+  useEffect(()=> {
+      const fetchMarketplaceItems = async () => {
+        try{
+        const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents`);
+        const data = await response.json();
+        console.log('data', data);
+        
+        setMarketPlaceItems(data);
+        setFilteredItems(data);
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
+    fetchMarketplaceItems();
+  }, [])
   // Function to check if an item is already in the cart
-  const isInCart = (itemId: string) => {
-    return cartAgent.some((item: MarketplaceItem) => item.id === itemId);
+  const isInCart = (itemId: number) => {
+    return cartAgent.some((item: Agent) => item.id === itemId);
   };
 
   // Filter and sort items based on search query, category, and sort option
 
   useEffect(() => {
-    let filtered = marketplaceItems.filter(
+    let filtered = marketPlaceItems.filter(
       (item) =>
         !usersAgent?.some(
-          (agentItem: MarketplaceItem) => agentItem.id === item.id
+          (agentItem: Agent) => agentItem.id === item.id
         )
     );
     // console.log('filtered', filtered);
@@ -112,7 +130,7 @@ const Marketplace = () => {
     setSelectedCategory(null);
     setSortOption("popular");
   };
-  const handleAddToCart = (item: MarketplaceItem) => {
+  const handleAddToCart = (item: Agent) => {
     setCartAgent([...cartAgent, item]);
   };
 
@@ -175,7 +193,7 @@ const Marketplace = () => {
           </Transition>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {marketplaceItems
+            {marketPlaceItems
               .filter((item) => item.featured)
               .slice(0, 3)
               .map((item, index) => (
@@ -282,7 +300,7 @@ const Marketplace = () => {
                     <h3 className="font-medium">{category}</h3>
                     <p className="text-xs text-muted-foreground">
                       {
-                        marketplaceItems.filter(
+                        marketPlaceItems.filter(
                           (item) => item.category === category
                         ).length
                       }{" "}
@@ -527,7 +545,7 @@ const Marketplace = () => {
                       onClick={() => {
                         setSearchQuery("");
                         setSelectedCategory(null);
-                        setFilteredItems(marketplaceItems);
+                        setFilteredItems(marketPlaceItems);
                       }}
                     >
                       Clear All Filters

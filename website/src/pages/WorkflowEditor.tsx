@@ -24,7 +24,8 @@ import AgentPanel from '@/components/workflow/AgentPanel';
 import InputModal from '@/components/workflow/InputModal';
 import WorkflowResults from '@/components/workflow/WorkflowResults';
 import { useWorkflowExecution } from '@/hooks/useWorkflowExecution';
-import { agents, Agent } from '@/lib/data';
+// import { agents, Agent } from '@/lib/data';
+import {Agent} from '@/lib/marketPlaceData';
 import { templates } from '@/lib/templateData';
 import { Button } from '@/components/ui/button';
 import { Save, Share2, Play, ArrowLeft, Trash2, Zap, StopCircle } from 'lucide-react';
@@ -45,6 +46,22 @@ const WorkflowEditor = () => {
   const [workflowName, setWorkflowName] = useState('New Workflow');
   const navigate = useNavigate();
   const location = useLocation();
+  const [agents, setAgents]= useState<Agent[]>([]);
+    useEffect(()=> {
+          const fetchAgents = async () => {
+            try{
+            const response = await fetch(`${import.meta.env.VITE_FAST_API_BACKEND_URL}/api/marketplace/agents`);
+            const data = await response.json();
+            console.log('data', data);
+            
+            setAgents(data);
+        }
+        catch(err){
+          console.log(err);
+        }
+      }
+        fetchAgents();
+      }, [])
 
   // Workflow execution state
   const {
@@ -159,13 +176,14 @@ const WorkflowEditor = () => {
       event.preventDefault();
 
       const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
-      const agentId = event.dataTransfer.getData('application/agentNode');
+      const agentId = Number(event.dataTransfer.getData('application/agentNode'));
       
       if (!reactFlowBounds || !agentId || !reactFlowInstance) {
         return;
       }
 
-      const agent = agents.find(a => a.id === agentId);
+      const agent = agents.find(a => a.id == agentId);
+      console.log('Dropped agent:', agent);
       if (!agent) return;
 
       const position = reactFlowInstance.screenToFlowPosition({

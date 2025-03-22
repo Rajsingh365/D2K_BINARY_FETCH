@@ -21,7 +21,7 @@ import '../styles/workflow-editor.css';
 
 import AgentNode from '@/components/workflow/AgentNode';
 import AgentPanel from '@/components/workflow/AgentPanel';
-import AgentInputModal from '@/components/workflow/AgentInputModal';
+import InputModal from '@/components/workflow/InputModal';
 import WorkflowResults from '@/components/workflow/WorkflowResults';
 import { useWorkflowExecution } from '@/hooks/useWorkflowExecution';
 import { agents, Agent } from '@/lib/data';
@@ -220,47 +220,40 @@ const WorkflowEditor = () => {
     }
   };
 
-  const handleAgentInputSubmit = (inputText: string, files: File[]) => {
+  const handleFormSubmit = (formData: FormData) => {
     setProcessingInput(true);
-    console.log('Submitting input:', inputText, files);
     
-    // Create FormData to send to the backend
-    const formData = new FormData();
-    formData.append('content', inputText);
-    formData.append('variables', JSON.stringify({})); // Add any variables if needed
-    formData.append('context', JSON.stringify({})); // Add any context if needed
+    // Extract content (text input)
+    const inputText = formData.get('content') as string;
     
-    // Append files if any
-    files.forEach(file => {
-      formData.append('file', file);
+    // Extract files
+    const files: File[] = [];
+    formData.getAll('file').forEach(file => {
+      if (file instanceof File) {
+        files.push(file);
+      }
     });
     
-    // For now we'll use the mock processing with a delay
+    console.log('Submitting form data:', {
+      text: inputText,
+      files: files.map(f => f.name)
+    });
+    
+    // Process the input using the workflow execution
     processAgentInput(inputText, files);
     
     // In a real implementation, you'd send the formData to your backend API
     // Example:
-    // const response = await fetch('/api/agent/process', {
+    // const response = await fetch('/api/workflow/process', {
     //   method: 'POST',
     //   body: formData,
     // });
     // const result = await response.json();
-    // processAgentInput(result.input, result.files);
+    // processResult(result);
     
     setTimeout(() => {
       setProcessingInput(false);
     }, 3000);
-  };
-
-  // Get the current result for the modal
-  const getCurrentResult = () => {
-    if (currentAgentIndex < 0 || currentAgentIndex >= results.length) {
-      return { input: '', output: '' };
-    }
-    return {
-      input: results[currentAgentIndex].input,
-      output: results[currentAgentIndex].output
-    };
   };
 
   return (      
@@ -392,27 +385,19 @@ const WorkflowEditor = () => {
         </div>
       </div>
 
-      {/* Single chatbot-like modal that handles all agent interactions */}
-      {activeAgent && (
-        <AgentInputModal
-          agent={activeAgent}
-          isOpen={showInputModal}
-          onClose={() => {
-            if (!processingInput) {
-              handleStopWorkflow();
-            }
-          }}
-          onSubmit={handleAgentInputSubmit}
-          isProcessing={processingInput}
-          result={showResults ? getCurrentResult() : undefined}
-          onContinue={continueWorkflow}
-          onModify={modifyCurrentStep}
-          onGoBack={goBackOneStep}
-          isFirstStep={currentAgentIndex === 0}
-          isLastStep={currentAgentIndex === executionSequence.length - 1}
-          showResults={showResults}
-        />
-      )}
+      {/* Simple Input Modal */}
+      <InputModal
+        isOpen={showInputModal}
+        onClose={() => {
+          if (!processingInput) {
+            handleStopWorkflow();
+          }
+        }}
+        onSubmit={handleFormSubmit}
+        isProcessing={processingInput}
+        title="Workflow Input"
+        description="Provide information for this workflow to process."
+      />
     </main>
   );
 };

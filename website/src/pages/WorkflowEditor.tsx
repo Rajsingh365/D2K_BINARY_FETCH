@@ -46,6 +46,7 @@ const WorkflowEditor = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+
   // Workflow execution state
   const {
     isRunning,
@@ -336,7 +337,7 @@ const WorkflowEditor = () => {
               </p>
             </div>
             <div className="p-4 h-[calc(100%-64px)]">
-              <AgentPanel agents={agents} />
+              <AgentPanel />
             </div>
           </div>
 

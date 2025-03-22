@@ -13,6 +13,8 @@ import NotFound from "./pages/NotFound";
 import RootLayout from "./pages/RootLayout";
 import {AuthProvider} from "./context/AuthUserContext";
 import Profile from "./pages/Profile";
+import PaymentCheckout from "./pages/PaymentCheckout";
+import Success from "./pages/Success";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +67,9 @@ const App = () => {
               <Route path="/my-workflows" element={<MyWorkflows />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/cart" element={<PaymentCheckout/>}/>
+              <Route path="/success" element={<Success/>}/> 
+              <Route path="/cancel" element={<Success/>}/>
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

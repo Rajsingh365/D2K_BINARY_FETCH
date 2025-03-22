@@ -58,23 +58,21 @@ class SmartEmailManager(BaseAgent):
         # Get original user prompt if available
         original_prompt = self.get_original_prompt(context) if context else ""
 
-        # Check if this is a meeting summary or other structured data
-        is_meeting_summary = "summary" in input_data and any(
-            [
-                "action_items" in input_data,
-                "participants" in input_data,
-                "duration_minutes" in input_data,
-            ]
-        )
+        # Determine the content type we're dealing with
+        content_type = self._detect_content_type(input_data)
+        logger.info(f"Detected content type: {content_type}")
 
         # Extract or create email object
         email = input_data.get("email", {})
 
         # If email is completely missing or not a dict, create an email dict from available data
         if not email or not isinstance(email, dict):
-            if is_meeting_summary:
+            if content_type == "meeting_summary":
                 # Create a more useful email from meeting summary
                 email = self._create_email_from_meeting_summary(input_data)
+            elif content_type == "seo_optimization":
+                # Create email from SEO optimization data
+                email = self._create_email_from_seo_data(input_data)
             elif "content" in input_data:
                 # Create from content field
                 email = {
@@ -115,6 +113,9 @@ class SmartEmailManager(BaseAgent):
         if "priority_level" in input_data:
             email["priority_level"] = input_data["priority_level"]
 
+        # Store content type for use in response generation
+        email["content_type"] = content_type
+
         # Process based on mode
         try:
             if self.mode == "categorize":
@@ -122,13 +123,10 @@ class SmartEmailManager(BaseAgent):
             elif self.mode == "prioritize":
                 result = self._prioritize_email(email)
             elif self.mode == "draft_response":
-                # Special case for meeting summary emails
-                if is_meeting_summary:
-                    result = self._draft_meeting_summary_response(
-                        email, input_data, user_prompt=original_prompt
-                    )
-                else:
-                    result = self._draft_response(email, user_prompt=original_prompt)
+                # Generate response based on detected content type
+                result = self._draft_content_based_response(
+                    email, input_data, user_prompt=original_prompt
+                )
             else:
                 result = {"error": f"Unknown mode: {self.mode}", "status": "failed"}
 
@@ -151,6 +149,29 @@ class SmartEmailManager(BaseAgent):
         except Exception as e:
             logger.error(f"Error processing email: {str(e)}", exc_info=True)
             return {"error": f"Email processing failed: {str(e)}", "status": "failed"}
+
+    def _detect_content_type(self, input_data: Dict[str, Any]) -> str:
+        """Detect the type of content received from previous agents."""
+        # Check for meeting summary specific fields
+        if "summary" in input_data and any(
+            [
+                "action_items" in input_data,
+                "participants" in input_data,
+                "duration_minutes" in input_data,
+            ]
+        ):
+            return "meeting_summary"
+
+        # Check for SEO optimization results
+        if "recommendations" in input_data and "seo_score" in input_data:
+            return "seo_optimization"
+
+        # Check for grammar checking results
+        if "corrected_text" in input_data and "grammar_issues" in input_data:
+            return "grammar_check"
+
+        # Default to generic content
+        return "generic_content"
 
     def _create_email_from_meeting_summary(
         self, meeting_data: Dict[str, Any]
@@ -190,6 +211,32 @@ class SmartEmailManager(BaseAgent):
             "body": body,
             "sender": "meeting-summary@company.com",
             "sender_name": sender_name,
+        }
+
+    def _create_email_from_seo_data(self, seo_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create an email object from SEO optimization data."""
+        content = seo_data.get("content", "")
+        recommendations = seo_data.get("recommendations", [])
+        seo_score = seo_data.get("seo_score", 0)
+        keywords = seo_data.get("keywords", [])
+
+        subject = "SEO Optimization Results"
+
+        # Format recommendations and keywords
+        recommendations_text = (
+            "\n".join([f"- {rec}" for rec in recommendations])
+            if recommendations
+            else "No specific recommendations."
+        )
+        keywords_text = ", ".join(keywords) if keywords else "No specific keywords."
+
+        body = f"SEO Analysis Results\n\nSEO Score: {seo_score}/100\n\nTarget Keywords: {keywords_text}\n\nRecommendations:\n{recommendations_text}\n\nAnalyzed Content:\n{content[:300]}..."
+
+        return {
+            "subject": subject,
+            "body": body,
+            "sender": "seo-analyzer@company.com",
+            "sender_name": "SEO Analyzer",
         }
 
     def _draft_meeting_summary_response(
@@ -284,6 +331,205 @@ Meeting Summary:
         except Exception as e:
             logger.error(
                 f"Error in _generate_meeting_response_with_gemini: {e}", exc_info=True
+            )
+            raise
+
+    def _draft_content_based_response(
+        self, email: Dict[str, Any], input_data: Dict[str, Any], user_prompt: str = ""
+    ) -> Dict[str, Any]:
+        """Generate a response based on the detected content type."""
+        content_type = email.get("content_type", "generic_content")
+
+        try:
+            if content_type == "meeting_summary":
+                return self._draft_meeting_summary_response(
+                    email, input_data, user_prompt=user_prompt
+                )
+            elif content_type == "seo_optimization":
+                return self._draft_seo_response(
+                    email, input_data, user_prompt=user_prompt
+                )
+            elif content_type == "grammar_check":
+                return self._draft_grammar_check_response(
+                    email, input_data, user_prompt=user_prompt
+                )
+            else:
+                # For generic content, use the standard response generator
+                return self._draft_response(email, user_prompt=user_prompt)
+        except Exception as e:
+            logger.error(f"Error in content-based response: {str(e)}", exc_info=True)
+            # Fall back to standard response
+            return self._draft_response(email, user_prompt=user_prompt)
+
+    def _draft_seo_response(
+        self, email: Dict[str, Any], seo_data: Dict[str, Any], user_prompt: str = ""
+    ) -> Dict[str, Any]:
+        """Generate a response for SEO optimization results."""
+        try:
+            response_body = self._generate_seo_response_with_gemini(
+                email.get("subject", "SEO Analysis"),
+                email.get("body", ""),
+                seo_data,
+                user_prompt=user_prompt,
+            )
+            return {
+                "email_id": email.get("id", "unknown"),
+                "subject": f"Re: {email.get('subject', 'SEO Analysis')}",
+                "response_body": response_body,
+                "suggested_follow_up": "in 1 week for SEO progress check",
+                "status": "success",
+                "original_content": seo_data.get("content", ""),  # For chaining
+            }
+        except Exception as e:
+            logger.error(
+                f"Error generating SEO response with Gemini: {str(e)}",
+                exc_info=True,
+            )
+            # Fall back to standard response
+            return self._draft_response(email, user_prompt=user_prompt)
+
+    def _generate_seo_response_with_gemini(
+        self,
+        subject: str,
+        body: str,
+        seo_data: Dict[str, Any],
+        user_prompt: str = "",
+    ) -> str:
+        """Generate an SEO-specific email response using Gemini."""
+        recommendations = seo_data.get("recommendations", [])
+        seo_score = seo_data.get("seo_score", 0)
+        keywords = seo_data.get("keywords", [])
+
+        # Format recommendations for the prompt
+        recommendations_text = (
+            "\n".join([f"- {rec}" for rec in recommendations])
+            if recommendations
+            else "No specific recommendations."
+        )
+
+        tone_desc = {
+            "professional": "formal, business-appropriate",
+            "friendly": "warm and conversational",
+            "concise": "brief and to-the-point",
+        }.get(self.response_tone, "professional")
+
+        # STRUCTURED SYSTEM PROMPT (SEO Specific)
+        prompt = f"""You are an AI assistant drafting a {tone_desc} email response to SEO optimization results.
+
+**SEO Analysis Details:**
+* Subject: {subject}
+* SEO Score: {seo_score}/100
+* Target Keywords: {", ".join(keywords) if keywords else "None specified"}
+
+**SEO Recommendations:**
+{recommendations_text}
+
+**User's Specific Instructions (If Any):**
+{user_prompt}
+
+**Response Requirements:**
+1. Acknowledge the SEO analysis results.
+2. Highlight the most important 2-3 recommendations.
+3. Suggest next steps for implementation.
+4. Use a {tone_desc} tone.
+5. Include a professional greeting and sign-off.
+
+Original Content:
+{body}
+"""
+        try:
+            response = self.model.generate_content(prompt)
+            logger.info(f"Gemini SEO response generated (raw): {response.text}")
+            return response.text
+        except Exception as e:
+            logger.error(
+                f"Error in _generate_seo_response_with_gemini: {e}", exc_info=True
+            )
+            raise
+
+    def _draft_grammar_check_response(
+        self, email: Dict[str, Any], grammar_data: Dict[str, Any], user_prompt: str = ""
+    ) -> Dict[str, Any]:
+        """Generate a response for grammar check results."""
+        try:
+            response_body = self._generate_grammar_response_with_gemini(
+                email.get("subject", "Grammar Check"),
+                email.get("body", ""),
+                grammar_data,
+                user_prompt=user_prompt,
+            )
+            return {
+                "email_id": email.get("id", "unknown"),
+                "subject": f"Re: {email.get('subject', 'Grammar Check')}",
+                "response_body": response_body,
+                "suggested_follow_up": None,
+                "status": "success",
+                "original_content": grammar_data.get(
+                    "corrected_text", ""
+                ),  # For chaining
+            }
+        except Exception as e:
+            logger.error(
+                f"Error generating grammar response with Gemini: {str(e)}",
+                exc_info=True,
+            )
+            # Fall back to standard response
+            return self._draft_response(email, user_prompt=user_prompt)
+
+    def _generate_grammar_response_with_gemini(
+        self,
+        subject: str,
+        body: str,
+        grammar_data: Dict[str, Any],
+        user_prompt: str = "",
+    ) -> str:
+        """Generate a grammar-check specific email response using Gemini."""
+        corrected_text = grammar_data.get("corrected_text", "")
+        issues = grammar_data.get("grammar_issues", [])
+
+        # Format issues for the prompt
+        issues_text = (
+            "\n".join([f"- {issue}" for issue in issues])
+            if issues
+            else "No major grammar issues found."
+        )
+
+        tone_desc = {
+            "professional": "formal, business-appropriate",
+            "friendly": "warm and conversational",
+            "concise": "brief and to-the-point",
+        }.get(self.response_tone, "professional")
+
+        # STRUCTURED SYSTEM PROMPT (Grammar Check Specific)
+        prompt = f"""You are an AI assistant drafting a {tone_desc} email response to grammar check results.
+
+**Grammar Check Details:**
+* Subject: {subject}
+* Number of Issues: {len(issues)}
+
+**Grammar Issues Identified:**
+{issues_text}
+
+**User's Specific Instructions (If Any):**
+{user_prompt}
+
+**Response Requirements:**
+1. Acknowledge the grammar check results.
+2. Briefly mention the most important improvements.
+3. Provide any relevant writing tips.
+4. Use a {tone_desc} tone.
+5. Include a professional greeting and sign-off.
+
+Original Content:
+{body}
+"""
+        try:
+            response = self.model.generate_content(prompt)
+            logger.info(f"Gemini grammar response generated (raw): {response.text}")
+            return response.text
+        except Exception as e:
+            logger.error(
+                f"Error in _generate_grammar_response_with_gemini: {e}", exc_info=True
             )
             raise
 
